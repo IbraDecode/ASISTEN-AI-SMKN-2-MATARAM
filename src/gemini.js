@@ -199,7 +199,7 @@ class GeminiClient {
 
   _buildPayload(msg) {
     const fullMsg = this.context
-      ? `${this.context}\n\nPertanyaan: ${msg}\n\nJawablah berdasarkan data di atas. Jika tidak ada informasinya di data, katakan dengan jujur bahwa Anda tidak tahu. Gunakan bahasa Indonesia yang ramah dan informatif.`
+      ? `${this.context}\n\nPertanyaan: ${msg}\n\nGunakan data sekolah di atas jika pertanyaan memang terkait SMKN 2 Mataram. Jika pertanyaan umum atau tentang diri Anda sebagai asisten, jawab secara natural dan ringkas. Jika detail sekolah tidak tersedia di data, katakan dengan jujur bahwa detail itu belum tersedia. Jangan berhenti di potongan kalimat.`
       : msg;
 
     let snapshot = [];
@@ -531,6 +531,8 @@ class GeminiClient {
       throw new Error("EMPTY_RESPONSE: no wrb.fr lines found");
     }
 
+    let best = null;
+
     for (const line of lines) {
       try {
         const outer = JSON.parse(line);
@@ -595,10 +597,16 @@ class GeminiClient {
           result.modelVersion = meta.modelVersion;
         }
 
-        return result;
+        if (!best || result.text.length >= best.text.length) {
+          best = result;
+        }
       } catch (e) {
         continue;
       }
+    }
+
+    if (best) {
+      return best;
     }
 
     throw new Error("PARSE_ERROR: could not extract text from response");
