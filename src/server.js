@@ -38,24 +38,42 @@ const streamer = new Streamer(whatsapp);
 const rateLimiter = new RateLimiter();
 const lastMessageId = {};
 const aiPool = {};
-
-let db;
+const AI_POOL_TTL = 30 * 60 * 1000; // 30 menit expired
+const aiPoolTimestamps = {};
 
 function getAI(userId) {
   if (!aiPool[userId]) {
     aiPool[userId] = new GeminiClient({ timeout: 20000 });
   }
+  aiPoolTimestamps[userId] = Date.now();
   return aiPool[userId];
 }
 
 setInterval(() => {
   db?.cleanupSessions(120);
   rateLimiter.cleanup();
-  const poolSize = Object.keys(aiPool).length;
-  if (poolSize > 100) {
-    const ids = Object.keys(aiPool);
-    const toDelete = ids.slice(0, poolSize - 50);
-    for (const id of toDelete) delete aiPool[id];
+
+  const now = Date.now();
+  const ids = Object.keys(aiPool);
+
+  // Hapus instance yang expired (>30 menit tidak dipakai)
+  for (const id of ids) {
+    if ((now - (aiPoolTimestamps[id] || 0)) > AI_POOL_TTL) {
+      delete aiPool[id];
+      delete aiPoolTimestamps[id];
+    }
+  }
+
+  // Juga cleanup kalau pool terlalu besar
+  const remaining = Object.keys(aiPool).length;
+  if (remaining > 100) {
+    const sorted = Object.entries(aiPoolTimestamps)
+      .sort((a, b) => a[1] - b[1]); // oldest first
+    const toDelete = sorted.slice(0, remaining - 50);
+    for (const [id] of toDelete) {
+      delete aiPool[id];
+      delete aiPoolTimestamps[id];
+    }
   }
 }, 60 * 1000);
 
@@ -65,10 +83,11 @@ setInterval(async () => {
 
 // ─── Auto-learn from AI ───
 async function autoLearnFromAI() {
+  if (!db) return;
   const unanswered = await db.getUnanswered(20);
   for (const item of unanswered) {
     const kbMatch = kb.search(item.question);
-    if (kbMatch.length > 0 && kbMatch[0].data.jawaban) {
+    if (kbMatch.find(m => m.data.jawaban)) {
       await db.markAnswered(item.id);
     }
   }
@@ -181,13 +200,13 @@ async function handleButton(from, name, buttonId, dbSession, lang) {
     }),
     menu_fasilitas: () => ({
       type: "text",
-      text: `🏫 *${lang === "en" ? "Facilities" : "Fasilitas"}*\n\n${(d.fasilitas || []).map(f => `• ${f}`).join("\n")}`
+      text: `🏫 *${lang === "en" ? "Facilities" : "Fasilitas"}*\n\n${(d.fasilitas || []).map(f => `• ${f.nama || f}: ${f.keterangan || ""}${f.jumlah ? " (" + f.jumlah + ")" : ""}`).join("\n")}`
     }),
     menu_beasiswa: () => {
       const bs = d.bantuan_siswa;
       return {
         type: "text",
-        text: `🎓 *${lang === "en" ? "Student Financial Aid" : "Bantuan Siswa"}*\n\n${bs ? `${bs.deskripsi}\n\n📋 ${lang === "en" ? "Programs:" : "Program:"}\n${(bs.program || []).map(p => `• ${p.nama}: ${p.keterangan}`).join("\n")}` : "Info belum tersedia."}`
+        text: `🎓 *${lang === "en" ? "Student Financial Aid" : "Bantuan Siswa"}*\n\n${bs ? bs.map(p => `*${p.program}*\n${p.sumber} — ${p.besaran}\n📋 ${p.syarat}`).join("\n\n") : "Info belum tersedia."}`
       };
     },
     menu_guru: () => {
@@ -198,13 +217,50 @@ async function handleButton(from, name, buttonId, dbSession, lang) {
       };
     },
     menu_kontak: () => ({
-      type: "text",
-      text: `📍 ${d.kontak.alamat}\n📞 ${d.kontak.telepon}\n📧 ${d.kontak.email}\n🌐 ${d.kontak.website}`
+      type: "location_and_cta",
+      text: `📍 *Alamat*\n${d.kontak.alamat}\n\n📞 ${d.kontak.telepon}\n📧 ${d.kontak.email}\n🌐 ${d.kontak.website}\n⏰ ${d.kontak.jam_kerja}\n\n📱 FB: ${d.kontak.facebook || "smeda.mataram"}\n🎥 YouTube: smkn2mataram.sch.id`,
+      location: { lat: -8.5833, lng: 116.1167, name: "SMKN 2 Mataram", address: d.kontak.alamat },
+      cta: { url: "https://smkn2mataram.sch.id", label: lang === "en" ? "🌐 Visit Website" : "🌐 Kunjungi Website" }
     }),
     menu_bantuan: () => ({
       type: "text",
-      text: `❓ *${lang === "en" ? "How to Use" : "Cara Menggunakan"}*\n\n${lang === "en" ? "Just type your question or choose from the menu. I can help with:\n• School profile\n• Majors info\n• Admission info\n• Facilities & extracurricular\n• Contact info\n\nType 'menu' anytime to return." : "Cukup ketik pertanyaan atau pilih dari menu. Saya bisa bantu:\n• Profil sekolah\n• Info jurusan\n• Info SPMB\n• Fasilitas & ekskul\n• Kontak sekolah\n\nKetik 'menu' kapan saja untuk kembali."}`
+      text: getString(lang, "help_text", { name: name || from, menu: "" })
     }),
+    menu_visimisi: () => {
+      const v = d.visi_misi;
+      return {
+        type: "text",
+        text: `🎯 *${lang === "en" ? "Vision & Mission" : "Visi & Misi SMKN 2 Mataram"}*\n\n*Visi:*\n${v.visi}\n\n*Misi:*\n${v.misi.map((m, i) => `${i + 1}. ${m}`).join("\n")}\n\n*Tujuan:*\n${v.tujuan}`
+      };
+    },
+    menu_seragam: () => {
+      const s = d.seragam;
+      return {
+        type: "text",
+        text: `👔 *${lang === "en" ? "Uniform" : "Seragam Sekolah"}*\n\nSenin: ${s.senin}\nSelasa: ${s.selasa}\nRabu: ${s.rabu}\nKamis: ${s.kamis}\nJumat: ${s.jumat}\n\nWajib: ${s.atribut_wajib.join(", ")}.\n${s.khusus_siswi}`
+      };
+    },
+    menu_jamsekolah: () => {
+      const j = d.jam_sekolah;
+      return {
+        type: "text",
+        text: `⏰ *${lang === "en" ? "School Hours" : "Jam Sekolah"}*\n\nSenin-Kamis: ${j.senin_kamis}\nJumat: ${j.jumat}\nIstirahat: ${j.istirahat}\n\n${j.keterangan}`
+      };
+    },
+    menu_mpls: () => {
+      const m = d.mpls;
+      return {
+        type: "text",
+        text: `📢 *${lang === "en" ? "MPLS (Orientation)" : "MPLS — Masa Pengenalan Lingkungan Sekolah"}*\n\n${m.deskripsi}\n\n📋 Kegiatan: ${m.kegiatan.map(k => `• ${k}`).join("\n")}\n\n🚫 Larangan: ${m.larangan.map(l => `• ${l}`).join("\n")}`
+      };
+    },
+    menu_alumni: () => {
+      const a = d.alumni;
+      return {
+        type: "text",
+        text: `🎓 *${lang === "en" ? "Alumni" : "Alumni SMKN 2 Mataram"}*\n\n${a.jumlah_alumni}\nAsosiasi: ${a.asosiasi}\nSebaran: ${a.sebaran}\n\n💼 Profesi: ${a.profesi.join(", ")}`
+      };
+    },
     menu_kembali: () => getWelcomeList(name || from, lang)
   };
 
@@ -230,8 +286,9 @@ async function processQuestion(from, name, text, dbSession, lang) {
   const topic = intent.label;
 
   const kbMatch = kb.search(text);
-  if (kbMatch.length > 0 && kbMatch[0].data.jawaban) {
-    const answer = toWhatsApp(kbMatch[0].data.jawaban);
+  const kbHit = kbMatch.find(m => m.data.jawaban);
+  if (kbHit) {
+    const answer = toWhatsApp(kbHit.data.jawaban);
     Analytics.trackMessage(from, name, { text, type: "text", source: "kb", topic, responseTime: 0 });
     return { text: answer, source: "kb", topic };
   }
@@ -254,13 +311,42 @@ async function processQuestion(from, name, text, dbSession, lang) {
     ai.setContext(smartCtx + historyStr + langInstruction);
     ai.reset();
 
-    const response = await ai.ask(text);
-    if (response?.text) {
-      const formatted = toWhatsApp(response.text);
-      const chunks = splitChunks(formatted, 600);
+    // Pakai streaming biar first word < 2 detik
+    const streamStart = Date.now();
+    let fullText = "";
 
-      Analytics.trackMessage(from, name, { text, type: "text", source: "ai", topic, responseTime: 0 });
-      return { text: chunks, source: "ai", topic, isStream: true };
+    const response = await ai.askStream(text, (delta, currentText) => {
+      fullText = currentText;
+      const formatted = toWhatsApp(delta);
+      if (!formatted.trim()) return;
+
+      // Kirim setiap chunk — kalau gagal, log tapi lanjut
+      whatsapp.sendMessage(from, formatted).catch(err => {
+        console.error(`[STREAM SEND ERR] ${from}: ${err.message}`);
+      });
+    });
+
+    if (response?.text) {
+      const timeMs = Date.now() - streamStart;
+      console.log(`[STREAM DONE] ${from}: ${response.text.length} chars in ${timeMs}ms`);
+
+      Analytics.trackMessage(from, name, { text, type: "text", source: "ai", topic, responseTime: timeMs });
+
+      // Feedback setelah stream selesai
+      const fbLang = lang || "id";
+      const fb = getFeedbackButtons(fbLang);
+      const mid = lastMessageId[from] || 0;
+      setTimeout(async () => {
+        try {
+          await sleep(1500);
+          await whatsapp.sendButtonMessage(from, fb.text, fb.buttons.map(b => ({
+            ...b,
+            id: b.id + (mid ? `_${mid}` : "")
+          })));
+        } catch (e) {}
+      }, 1000);
+
+      return { text: response.text, source: "ai", topic, streamed: true };
     }
     throw new Error("empty");
   } catch (err) {
@@ -276,8 +362,9 @@ async function processQuestion(from, name, text, dbSession, lang) {
     }
 
     const fb = kb.search(text);
-    if (fb.length > 0 && fb[0].data.jawaban) {
-      return { text: toWhatsApp(fb[0].data.jawaban), source: "kb", topic };
+    const fbHit = fb.find(f => f.data.jawaban);
+    if (fbHit) {
+      return { text: toWhatsApp(fbHit.data.jawaban), source: "kb", topic };
     }
 
     await db.addUnanswered(from, text, `AI+KB fail: ${err.message.substring(0, 100)}`);
@@ -298,7 +385,7 @@ async function sendReply(from, reply, lang, name) {
     await sleep(1000);
     const menu = getWelcomeList(name || from, lang || "id");
     if (menu.sections) {
-      await whatsapp.sendListMessage(from, menu.text, menu.button, menu.sections);
+      await whatsapp.sendListMessage(from, menu.text, menu.button, menu.sections, { header: menu.header, footer: menu.footer || "SMKN 2 Mataram — Ketik 'menu' kapan saja" });
     } else if (menu.buttons) {
       await whatsapp.sendButtonMessage(from, menu.text, menu.buttons);
     }
@@ -306,6 +393,7 @@ async function sendReply(from, reply, lang, name) {
   }
 
   if (reply.isStream && Array.isArray(reply.text)) {
+    // Legacy streaming — send chunks with natural delays
     await streamer.stream(from, reply.text, {
       feedbackCallback: async (uid) => {
         const session = await db.getOrCreateSession(uid);
@@ -322,6 +410,11 @@ async function sendReply(from, reply, lang, name) {
     return;
   }
 
+  if (reply.streamed) {
+    // True SSE streaming — already sent incrementally, no further action needed
+    return;
+  }
+
   if (typeof reply.text === "string") {
     const parts = Splitter.split(reply.text);
     for (const part of parts) {
@@ -331,12 +424,32 @@ async function sendReply(from, reply, lang, name) {
   }
 
   if (reply.type === "list" && reply.sections) {
-    await whatsapp.sendListMessage(from, reply.text, reply.button || "Pilih", reply.sections);
+    await whatsapp.sendListMessage(from, reply.text, reply.button || "Pilih", reply.sections, {
+      header: reply.header,
+      footer: reply.footer || "SMKN 2 Mataram"
+    });
     return;
   }
 
   if (reply.type === "buttons" || reply.buttons) {
     await whatsapp.sendButtonMessage(from, reply.text, reply.buttons);
+    return;
+  }
+
+  if (reply.type === "location_and_cta") {
+    // Send: text info + location + optional CTA button
+    const parts = Splitter.split(reply.text);
+    for (const part of parts) {
+      await whatsapp.sendMessage(from, part);
+    }
+    if (reply.location) {
+      await sleep(500);
+      await whatsapp.sendLocation(from, reply.location.lat, reply.location.lng, reply.location.name, reply.location.address);
+    }
+    if (reply.cta) {
+      await sleep(800);
+      await whatsapp.sendCTAButton(from, reply.cta.label || "Visit our website", reply.cta.url, reply.cta.label || "Open");
+    }
     return;
   }
 
@@ -379,8 +492,9 @@ app.post("/webhook", async (req, res) => {
     return;
   }
 
-  // Group chat: hanya reply jika @mention
-  if (msgType === "group" || req.body?.entry?.[0]?.changes?.[0]?.value?.messages?.[0]?.context) {
+  // Group chat: hanya reply jika @mention (context.group_id = group message)
+  const msgCtx = req.body?.entry?.[0]?.changes?.[0]?.value?.messages?.[0]?.context;
+  if (msgCtx?.group_id) {
     return;
   }
 
@@ -479,7 +593,7 @@ app.get("/log/:n", authMiddleware, (req, res) => {
   res.json(Analytics.getRecentLog(n));
 });
 
-app.post("/simulate", async (req, res) => {
+app.post("/simulate", authMiddleware, async (req, res) => {
   const { userId, name, text, buttonId, lang: simLang } = req.body;
   if (!userId || (!text && !buttonId)) {
     return res.status(400).json({ error: "userId and text or buttonId required" });

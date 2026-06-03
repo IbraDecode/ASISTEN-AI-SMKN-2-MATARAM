@@ -1,4 +1,26 @@
 const nodeFetch = require("node-fetch");
+const crypto = require("crypto");
+
+// ─── Model IDs (dari reverse engineering gemini.google.com) ───
+// Sumber: g4f (xtekky/gpt4free) + HanaokaYuzu/Gemini-API — June 2026
+const MODELS = {
+  FLASH:        "9ec249fc9ad08861",  // gemini-2.5-flash
+  PRO:          "61530e79959ab139",  // gemini-2.5-pro
+  THINKING:     "9c17b1863f581b8a",  // gemini-2.5-flash-thinking
+  PRO_EXP:      "2525e3954d185b3c",  // gemini-2.5-pro-exp
+  FLASH_EXP:    "35609594dbe934d8",  // gemini-2.5-flash-exp
+  DEEP_SEARCH:  "cd472a54d2abba7e",  // gemini-deep-research
+  GEMINI_3_PRO: "9d8ca3786ebdfbea",  // gemini-3-pro
+  GEMINI_20:    "f299729663a2343f",  // gemini-2.0-flash
+};
+const MODEL_HEADER_KEY = "x-goog-ext-525001261-jspb";
+function buildModelHeader(modelId, isPro = false) {
+  // Pro/3-series: format berbeda dari Flash
+  if (isPro) {
+    return JSON.stringify([1,null,null,null,modelId,null,null,0,[4]]);
+  }
+  return JSON.stringify([1,null,null,null,modelId,null,null,0,[4],null,null,2]);
+}
 
 // ─── Global state ───
 const tokenCache = { tokens: null, cookies: null, lastFetch: 0, ttl: 5 * 60 * 1000 };
@@ -38,6 +60,26 @@ class GeminiClient {
     this.timeout = opts.timeout || 20000;
     this.maxRetries = opts.maxRetries || 2;
     this.userAgent = opts.userAgent || USER_AGENTS[uaIndex++ % USER_AGENTS.length];
+
+    // Model selection
+    const modelName = (opts.model || "flash").toLowerCase();
+    this._setModelByName(modelName);
+  }
+
+  _setModelByName(name) {
+    const key = name.toUpperCase();
+    if (MODELS[key]) {
+      this.modelId = MODELS[key];
+      const isPro = key.includes("PRO") || key.includes("GEMINI_3");
+      this.modelHeader = buildModelHeader(this.modelId, isPro);
+    } else {
+      this.modelId = MODELS.FLASH;
+      this.modelHeader = buildModelHeader(MODELS.FLASH);
+    }
+  }
+
+  setModel(name) {
+    this._setModelByName(name);
   }
 
   setContext(ctx) {
@@ -93,10 +135,16 @@ class GeminiClient {
           || this._extract(html, '"FdrFJe":"', '"')
           || this._extract(html, "FdrFJe", '"');
 
+        // SNlM0e dihapus Google sejak April 2026 — optional
         const at = this._regexExtract(html, /"SNlM0e"[^:]*:\s*"([^"]+)"/)
-          || this._extract(html, '"SNlM0e":"', '"');
+          || this._extract(html, '"SNlM0e":"', '"')
+          || "";
 
-        tokenCache.tokens = { bl, fsid, at };
+        // Token tambahan untuk future-proofing
+        const lang = this._regexExtract(html, /"TuX5cc"[^:]*:\s*"([^"]+)"/) || "";
+        const pushId = this._regexExtract(html, /"qKIAYe"[^:]*:\s*"([^"]+)"/) || "";
+
+        tokenCache.tokens = { bl, fsid, at, lang, pushId };
         tokenCache.cookies = cookies;
         tokenCache.lastFetch = Date.now();
 
@@ -164,10 +212,28 @@ class GeminiClient {
       snapshot = [[null, null, null, null, null, null, null, null, null, null, convId || null, respId]];
     }
 
-    return [
-      null,
-      JSON.stringify([[fullMsg, 0, null, null, null, snapshot, 0]])
-    ];
+    // Structured payload matching Gemini's internal format
+    // Field [79] = model selector
+    const inner = new Array(80).fill(null);
+    inner[0] = [fullMsg, 0, null, null, null, snapshot, 0];
+    inner[1] = ["id"];
+    inner[2] = ["", "", "", null, null, null, null, null, null, ""];
+    inner[6] = [0];
+    inner[7] = 1;
+    inner[10] = 1;
+    inner[11] = 0;
+    inner[17] = [[0]];  // [think_mode] — 0 = off
+    inner[18] = 0;
+    inner[27] = 1;
+    inner[30] = [4];
+    inner[41] = [2];
+    inner[53] = 0;
+    inner[59] = crypto.randomUUID();
+    inner[61] = [];
+    inner[68] = 1;
+    inner[79] = this.modelId;
+
+    return [null, JSON.stringify(inner)];
   }
 
   async ask(msg) {
@@ -261,7 +327,8 @@ class GeminiClient {
         origin: "https://gemini.google.com",
         referer: "https://gemini.google.com/",
         accept: "*/*",
-        "accept-language": "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7"
+        "accept-language": "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7",
+        [MODEL_HEADER_KEY]: this.modelHeader
       };
 
       if (tokenCache.cookies) headers.cookie = tokenCache.cookies;
@@ -279,10 +346,181 @@ class GeminiClient {
       if (res.status === 429) throw new Error("429_RATE_LIMITED");
       if (res.status !== 200) throw new Error(`HTTP_${res.status}`);
 
-      const raw = await res.text();
+      // Baca response sebagai stream biar first word < 2 detik
+      const raw = await this._readStreamBody(res.body);
       return this._parse(raw);
     } finally {
       clearTimeout(timeoutId);
+    }
+  }
+
+  // Streaming version: callback on each chunk as it arrives
+  async askStream(msg, onChunk) {
+    if (!tokenCache.tokens || !tokenCache.tokens.fsid || !tokenCache.tokens.bl) {
+      await this._fetchTokens();
+    }
+
+    metrics.apiCalls++;
+
+    const payload = this._buildPayload(msg);
+    const params = new URLSearchParams({
+      bl: tokenCache.tokens.bl,
+      "f.sid": tokenCache.tokens.fsid,
+      hl: "id",
+      _reqid: this.reqId++,
+      rt: "c"
+    });
+
+    const url = `https://gemini.google.com/_/BardChatUi/data/assistant.lamda.BardFrontendService/StreamGenerate?${params}`;
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+
+    try {
+      const headers = {
+        "content-type": "application/x-www-form-urlencoded;charset=UTF-8",
+        "user-agent": this.userAgent,
+        "x-same-domain": "1",
+        origin: "https://gemini.google.com",
+        referer: "https://gemini.google.com/",
+        accept: "*/*",
+        "accept-language": "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7",
+        [MODEL_HEADER_KEY]: this.modelHeader
+      };
+
+      if (tokenCache.cookies) headers.cookie = tokenCache.cookies;
+
+      const atParam = tokenCache.tokens.at || "";
+
+      const res = await nodeFetch(url, {
+        method: "POST",
+        signal: controller.signal,
+        headers,
+        body: `f.req=${encodeURIComponent(JSON.stringify(payload))}&at=${encodeURIComponent(atParam)}`
+      });
+
+      if (res.status === 403) throw new Error("403_FORBIDDEN");
+      if (res.status === 429) throw new Error("429_RATE_LIMITED");
+      if (res.status !== 200) throw new Error(`HTTP_${res.status}`);
+
+      // Stream parsing — process chunks as they arrive
+      return await this._parseStream(res.body, onChunk);
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
+
+  _readStreamBody(body) {
+    return new Promise((resolve, reject) => {
+      const chunks = [];
+      body.on("data", (chunk) => chunks.push(chunk));
+      body.on("end", () => resolve(Buffer.concat(chunks).toString("utf-8")));
+      body.on("error", reject);
+    });
+  }
+
+  async _parseStream(body, onChunk) {
+    let buffer = "";
+    let prevText = "";
+    let result = null;
+
+    const self = this;
+
+    return new Promise((resolve, reject) => {
+      body.on("data", (chunk) => {
+        buffer += chunk.toString("utf-8");
+
+        // Process all complete lines in buffer
+        let newlineIdx;
+        while ((newlineIdx = buffer.indexOf("\n")) !== -1) {
+          const line = buffer.substring(0, newlineIdx);
+          buffer = buffer.substring(newlineIdx + 1);
+
+          if (!line.startsWith('[["wrb.fr"')) continue;
+
+          try {
+            const parsed = self._parseLine(line);
+            if (!parsed) continue;
+
+            if (parsed.text && parsed.text.length > prevText.length) {
+              const delta = parsed.text.substring(prevText.length);
+              prevText = parsed.text;
+
+              if (onChunk && typeof onChunk === "function") {
+                onChunk(delta, parsed.text);
+              }
+            }
+
+            // Simpan result final (last/complete line)
+            result = parsed;
+          } catch (e) {
+            // skip invalid lines
+          }
+        }
+      });
+
+      body.on("end", () => {
+        if (result) {
+          // Apply conversation state
+          if (result.inner?.[0]) {
+            self.conversationId = result.inner[0];
+          }
+          if (result.inner?.[1]) {
+            self.responseId = result.inner[1];
+          } else if (Array.isArray(result.inner?.[0])) {
+            self.responseId = result.inner[0];
+            self.conversationId = null;
+          }
+          self.lastMeta = result.meta;
+
+          const finalResult = { text: result.text.trim(), safetyBlocked: false };
+          if (result.meta?.safetyScore !== undefined) finalResult.safetyScore = result.meta.safetyScore;
+          if (result.meta?.modelVersion) finalResult.modelVersion = result.meta.modelVersion;
+
+          resolve(finalResult);
+        } else {
+          reject(new Error("EMPTY_RESPONSE: no wrb.fr lines in stream"));
+        }
+      });
+
+      body.on("error", reject);
+    });
+  }
+
+  _parseLine(line) {
+    try {
+      const outer = JSON.parse(line);
+      if (!outer?.[0]?.[2]) return null;
+
+      const inner = JSON.parse(outer[0][2]);
+      if (!inner?.[4]?.[0]) return null;
+
+      const choice = inner[4][0];
+
+      const textRaw = choice[1];
+      let text = "";
+      if (typeof textRaw === "string") {
+        text = textRaw;
+      } else if (Array.isArray(textRaw) && textRaw.length > 0) {
+        text = textRaw[0];
+      }
+
+      if (!text || text.trim().length === 0) return null;
+
+      const meta = {};
+      if (Array.isArray(choice[2]) && choice[2][4] && Array.isArray(choice[2][4])) {
+        meta.safetyScore = choice[2][4][2];
+      }
+      if (Array.isArray(choice[8])) {
+        meta.modelVersion = choice[8][0];
+      }
+      if (choice[9]) {
+        meta.lang = choice[9];
+      }
+
+      return { text: text.trim(), inner, choice, meta };
+    } catch (e) {
+      return null;
     }
   }
 
@@ -415,3 +653,4 @@ class GeminiClient {
 }
 
 module.exports = GeminiClient;
+module.exports.MODELS = MODELS;

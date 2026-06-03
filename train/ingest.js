@@ -26,6 +26,11 @@ function validate() {
   if (!data.faq?.length) errors.push("minimal 1 faq");
   if (!data.kontak?.telepon) errors.push("kontak.telepon wajib");
   if (!data.kontak?.email) errors.push("kontak.email wajib");
+  if (!data.visi_misi?.visi) warnings.push("visi_misi belum diisi");
+  if (!data.seragam?.senin) warnings.push("seragam belum diisi");
+  if (!data.jam_sekolah?.senin_kamis) warnings.push("jam_sekolah belum diisi");
+  if (!data.mpls?.deskripsi) warnings.push("mpls belum diisi");
+  if (!data.alumni?.jumlah_alumni) warnings.push("alumni belum diisi");
 
   data.jurusan.forEach((j, i) => {
     if (!j.id) warnings.push(`jurusan[${i}]: tidak punya id`);

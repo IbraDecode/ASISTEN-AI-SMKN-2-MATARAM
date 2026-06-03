@@ -110,31 +110,48 @@ Tahapan: ${d.spmb.tahapan.map((t, i) => `${i + 1}. ${t}`).join(" | ")}`
   }
 
   search(query) {
-    const q = query.toLowerCase();
+    const q = query.toLowerCase().trim();
     const results = [];
     const d = this.data;
-    if (!d) return results;
+    if (!d || !q) return results;
+
+    // Tokenize query into keywords
+    const tokens = q.split(/\s+/).filter(t => t.length > 1);
 
     d.jurusan.forEach((j) => {
-      if (
-        j.nama.toLowerCase().includes(q) ||
-        j.singkatan.toLowerCase().includes(q) ||
-        j.deskripsi.toLowerCase().includes(q)
-      ) {
-        results.push({ type: "jurusan", data: j, score: 1 });
+      const target = (j.nama + " " + j.singkatan + " " + j.deskripsi).toLowerCase();
+      let score = 0;
+      if (target.includes(q)) { score = 10; }
+      else {
+        for (const t of tokens) {
+          if (target.includes(t)) score++;
+        }
+      }
+      if (score > 0) {
+        results.push({ type: "jurusan", data: j, score });
       }
     });
 
     d.faq.forEach((f) => {
-      if (
-        f.pertanyaan.toLowerCase().includes(q) ||
-        f.jawaban.toLowerCase().includes(q)
-      ) {
-        results.push({ type: "faq", data: f, score: 1 });
+      const pertanyaan = f.pertanyaan.toLowerCase();
+      const jawaban = f.jawaban.toLowerCase();
+      const target = pertanyaan + " " + jawaban;
+      let score = 0;
+      if (target.includes(q)) { score = 10; }
+      else {
+        for (const t of tokens) {
+          if (pertanyaan.includes(t)) score += 3; // prefer question match
+          else if (jawaban.includes(t)) score++;
+        }
+      }
+      if (score > 0) {
+        results.push({ type: "faq", data: f, score });
       }
     });
 
-    return results;
+    // Sort by score descending, keep top 5
+    results.sort((a, b) => b.score - a.score);
+    return results.slice(0, 5);
   }
 
   smartContext(query) {

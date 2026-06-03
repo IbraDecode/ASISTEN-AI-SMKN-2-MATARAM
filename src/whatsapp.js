@@ -12,7 +12,7 @@ class WhatsAppClient {
     this.phoneNumberId = config.phoneNumberId;
     this.accessToken = config.accessToken;
     this.verifyToken = config.verifyToken;
-    this.apiVersion = "v22.0";
+    this.apiVersion = "v25.0";
     this.baseUrl = `https://graph.facebook.com/${this.apiVersion}/${this.phoneNumberId}/messages`;
     this.lastSendTime = 0;
     this.minInterval = 200;
@@ -66,7 +66,7 @@ class WhatsAppClient {
       recipient_type: "individual",
       to: to,
       type: "text",
-      text: { preview_url: false, body: String(text).substring(0, MAX_TEXT_LENGTH) }
+      text: { preview_url: true, body: String(text).substring(0, MAX_TEXT_LENGTH) }
     };
 
     return this._enqueue(async () => {
@@ -90,7 +90,7 @@ class WhatsAppClient {
     });
   }
 
-  async sendButtonMessage(to, text, buttons) {
+  async sendButtonMessage(to, text, buttons, opts = {}) {
     const safeButtons = (buttons || []).slice(0, MAX_BUTTONS);
     if (safeButtons.length === 0) {
       return this.sendMessage(to, text);
@@ -103,7 +103,9 @@ class WhatsAppClient {
       type: "interactive",
       interactive: {
         type: "button",
+        header: opts.header ? { type: "text", text: String(opts.header).substring(0, 60) } : undefined,
         body: { text: String(text).substring(0, 1024) },
+        footer: opts.footer ? { text: String(opts.footer).substring(0, 60) } : undefined,
         action: {
           buttons: safeButtons.map((b, i) => ({
             type: "reply",
@@ -134,7 +136,7 @@ class WhatsAppClient {
     });
   }
 
-  async sendListMessage(to, text, buttonLabel, sections) {
+  async sendListMessage(to, text, buttonLabel, sections, opts = {}) {
     const body = {
       messaging_product: "whatsapp",
       recipient_type: "individual",
@@ -142,7 +144,9 @@ class WhatsAppClient {
       type: "interactive",
       interactive: {
         type: "list",
+        header: opts.header ? { type: "text", text: String(opts.header).substring(0, 60) } : undefined,
         body: { text: String(text).substring(0, 1024) },
+        footer: opts.footer ? { text: String(opts.footer).substring(0, 60) } : undefined,
         action: {
           button: String(buttonLabel).substring(0, 20),
           sections: (sections || []).slice(0, 10)
@@ -188,6 +192,181 @@ class WhatsAppClient {
     } catch (err) {
       console.error(`[WA MARKREAD FAIL] ${to}: ${err.message}`);
     }
+  }
+
+  async sendLocation(to, lat, lng, name, address) {
+    const body = {
+      messaging_product: "whatsapp",
+      recipient_type: "individual",
+      to: to,
+      type: "location",
+      location: {
+        longitude: lng,
+        latitude: lat,
+        name: String(name || "").substring(0, 100),
+        address: String(address || "").substring(0, 256)
+      }
+    };
+
+    return this._enqueue(async () => {
+      await this._rateLimit();
+      try {
+        const res = await this._fetch(this.baseUrl, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(body)
+        });
+        const result = await res.json();
+        if (!result.error) this.conversationCount++;
+        return result;
+      } catch (err) {
+        console.error(`[WA LOC FAIL] ${to}: ${err.message}`);
+        return { error: { message: err.message } };
+      }
+    });
+  }
+
+  async sendCTAButton(to, text, url, buttonLabel, opts = {}) {
+    const body = {
+      messaging_product: "whatsapp",
+      recipient_type: "individual",
+      to: to,
+      type: "interactive",
+      interactive: {
+        type: "cta_url",
+        header: opts.header ? { type: "text", text: String(opts.header).substring(0, 60) } : undefined,
+        body: { text: String(text).substring(0, 1024) },
+        footer: opts.footer ? { text: String(opts.footer).substring(0, 60) } : undefined,
+        action: {
+          name: "cta_url",
+          parameters: {
+            display_text: String(buttonLabel || "Open Link").substring(0, 20),
+            url: String(url).substring(0, 2000)
+          }
+        }
+      }
+    };
+
+    return this._enqueue(async () => {
+      await this._rateLimit();
+      try {
+        const res = await this._fetch(this.baseUrl, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(body)
+        });
+        const result = await res.json();
+        if (!result.error) this.conversationCount++;
+        return result;
+      } catch (err) {
+        console.error(`[WA CTA FAIL] ${to}: ${err.message}`);
+        return { error: { message: err.message } };
+      }
+    });
+  }
+
+  async sendLocationRequest(to, text) {
+    const body = {
+      messaging_product: "whatsapp",
+      recipient_type: "individual",
+      to: to,
+      type: "interactive",
+      interactive: {
+        type: "location_request_message",
+        body: { text: String(text || "📍 Share your location").substring(0, 1024) },
+        action: { name: "send_location" }
+      }
+    };
+
+    return this._enqueue(async () => {
+      await this._rateLimit();
+      try {
+        const res = await this._fetch(this.baseUrl, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(body)
+        });
+        const result = await res.json();
+        if (!result.error) this.conversationCount++;
+        return result;
+      } catch (err) {
+        console.error(`[WA LOCREQ FAIL] ${to}: ${err.message}`);
+        return { error: { message: err.message } };
+      }
+    });
+  }
+
+  async sendImage(to, url, caption) {
+    const body = {
+      messaging_product: "whatsapp",
+      recipient_type: "individual",
+      to: to,
+      type: "image",
+      image: {
+        link: String(url).substring(0, 2048),
+        caption: String(caption || "").substring(0, 1024)
+      }
+    };
+
+    return this._enqueue(async () => {
+      await this._rateLimit();
+      try {
+        const res = await this._fetch(this.baseUrl, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(body)
+        });
+        const result = await res.json();
+        if (!result.error) this.conversationCount++;
+        return result;
+      } catch (err) {
+        console.error(`[WA IMG FAIL] ${to}: ${err.message}`);
+        return { error: { message: err.message } };
+      }
+    });
+  }
+
+  async sendReaction(to, messageId, emoji) {
+    const body = {
+      messaging_product: "whatsapp",
+      recipient_type: "individual",
+      to: to,
+      type: "reaction",
+      reaction: {
+        message_id: messageId,
+        emoji: String(emoji || "👍").substring(0, 1)
+      }
+    };
+
+    return this._enqueue(async () => {
+      await this._rateLimit();
+      try {
+        const res = await this._fetch(this.baseUrl, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(body)
+        });
+        return await res.json();
+      } catch (err) {
+        console.error(`[WA REACT FAIL] ${to}: ${err.message}`);
+        return { error: { message: err.message } };
+      }
+    });
   }
 
   async _rateLimit() {
@@ -248,6 +427,14 @@ class WhatsAppClient {
           text: msg.interactive.list_reply.title,
           buttonId: msg.interactive.list_reply.id,
           isButton: true
+        };
+      }
+
+      if (msg.type === "interactive" && msg.interactive?.cta_url) {
+        return {
+          ...base,
+          text: msg.interactive.cta_url.display_text || (msg.text?.body || ""),
+          buttonId: "cta_url_clicked"
         };
       }
 

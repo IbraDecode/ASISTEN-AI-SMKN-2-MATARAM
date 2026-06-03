@@ -9,7 +9,7 @@ const LANGUAGES = {
     name: "Bahasa Indonesia",
     code: "id",
     keywords: ["apa", "bagaimana", "kenapa", "siapa", "dimana", "kapan", "berapa", "saya", "kamu", "kami", "tolong", "bisa", "ada", "tidak", "ya", "hai", "halo", "makasih", "terima kasih"],
-    welcome: "Halo {name} 👋\n\nSelamat datang di *Asisten AI SMKN 2 Mataram*.\nSaya siap membantu Anda menjawab pertanyaan seputar sekolah.",
+    welcome: "Halo {name} 👋\n\nSelamat datang di *Asisten AI SMKN 2 Mataram* 🇮🇩\nSaya siap membantu Anda menjawab pertanyaan seputar sekolah.\n\n💡 *Tips:* Ketik 'menu' kapan saja atau pilih dari tombol di bawah.",
     menu_jurusan: "📚 Jurusan",
     menu_spmb: "📋 SPMB",
     menu_kontak: "📞 Kontak",
@@ -28,14 +28,14 @@ const LANGUAGES = {
     choose_language: "Pilih bahasa:",
     language_set: "Bahasa diubah ke {lang} ✅",
     type_help: "Ketik 'menu' untuk kembali ke menu utama",
-    help_text: "Halo {name}! 👋\n\nSaya asisten AI SMKN 2 Mataram. Saya bisa:\n• Info jurusan (RPL, TKJ, AKL, dll)\n• Syarat & jadwal SPMB\n• Fasilitas & ekstrakurikuler\n• Prestasi sekolah\n• Kontak sekolah\n\nCukup ketik pertanyaan atau pilih menu. Ketik 'menu' untuk kembali kapan saja."
+    help_text: "Halo {name}! 👋\n\nSaya asisten AI SMKN 2 Mataram 🤖\n\n*Yang bisa saya bantu:*\n• 📚 Info jurusan (RPL, TKJ, AKL, BD, UPW, BRT, MPK)\n• 📋 Syarat & jadwal SPMB\n• 🏫 Fasilitas & ekstrakurikuler\n• 🏆 Prestasi sekolah\n• 👔 Aturan seragam & jam sekolah\n• 🎯 Visi & misi sekolah\n• 📞 Kontak sekolah\n\n*Cara pakai:*\nCukup ketik pertanyaan langsung, atau pilih dari menu. Ketik 'menu' untuk kembali kapan saja."
   },
 
   en: {
     name: "English",
     code: "en",
     keywords: ["what", "how", "why", "who", "where", "when", "how much", "i", "you", "we", "please", "can", "is", "are", "do", "does", "hello", "hi", "thanks", "thank you"],
-    welcome: "Hello {name} 👋\n\nWelcome to *SMKN 2 Mataram AI Assistant*.\nI'm here to help you with information about our school.",
+    welcome: "Hello {name} 👋\n\nWelcome to *SMKN 2 Mataram AI Assistant* 🇮🇩\nI'm here to help you with information about our school.\n\n💡 *Tip:* Type 'menu' anytime or pick from the buttons below.",
     menu_jurusan: "📚 Majors",
     menu_spmb: "📋 Admission",
     menu_kontak: "📞 Contact",
@@ -54,14 +54,14 @@ const LANGUAGES = {
     choose_language: "Choose language:",
     language_set: "Language changed to {lang} ✅",
     type_help: "Type 'menu' to return to main menu",
-    help_text: "Hello {name}! 👋\n\nI'm the SMKN 2 Mataram AI Assistant. I can help with:\n• Majors info (RPL, TKJ, AKL, etc.)\n• Admission requirements & schedule\n• Facilities & extracurricular\n• School achievements\n• Contact info\n\nJust type your question or pick from the menu. Type 'menu' anytime to return."
+    help_text: "Hello {name}! 👋\n\nI'm the SMKN 2 Mataram AI Assistant 🤖\n\n*What I can help with:*\n• 📚 Majors info (RPL, TKJ, AKL, BD, UPW, BRT, MPK)\n• 📋 Admission requirements & schedule\n• 🏫 Facilities & extracurricular\n• 🏆 School achievements\n• 👔 Uniform rules & school hours\n• 🎯 Vision & mission\n• 📞 Contact info\n\n*How to use:*\nJust type your question directly, or pick from the menu. Type 'menu' to return anytime."
   },
 
   sas: {
     name: "Sasak",
     code: "sas",
     keywords: ["ape", "kembe", "kenapa", "se", "dimbe", "pire", "tiang", "side", "ite", "tulung", "bisa", "ade", "ndeq", "ya", "hai", "halo", "matur suksma", "tampiasih"],
-    welcome: "Halo {name} 👋\n\nSelamat datas kaik *Asisten AI SMKN 2 Mataram*.\nTiang siap mantul sampean nawer informasi sekolah.",
+    welcome: "Halo {name} 👋\n\nSelamat datas kaik *Asisten AI SMKN 2 Mataram* 🇮🇩\nTiang siap mantul sampean nawer informasi sekolah.\n\n💡 *Tips:* Ketik 'menu' kapan aja atau pilih tombol di bave.",
     menu_jurusan: "📚 Jurusan",
     menu_spmb: "📋 SPMB",
     menu_kontak: "📞 Kontak",
@@ -80,7 +80,7 @@ const LANGUAGES = {
     choose_language: "Pilih bahasa:",
     language_set: "Bahasa ubah dadi {lang} ✅",
     type_help: "Ketik 'menu' balik ka menu utama",
-    help_text: "Halo {name}! 👋\n\nTiang asisten AI SMKN 2 Mataram. Tiang isa mantul:\n• Info jurusan (RPL, TKJ, AKL, dll)\n• Syarat & jadwal SPMB\n• Fasilitas & ekstrakurikuler\n• Prestasi sekolah\n• Kontak sekolah\n\nCukup ketik pertanyaan atau pilih menu. Ketik 'menu' balik kapan aja."
+    help_text: "Halo {name}! 👋\n\nTiang asisten AI SMKN 2 Mataram 🤖\n\n*Yang isa tiang bantu:*\n• 📚 Info jurusan (RPL, TKJ, AKL, BD, UPW, BRT, MPK)\n• 📋 Syarat & jadwal SPMB\n• 🏫 Fasilitas & ekstrakurikuler\n• 🏆 Prestasi sekolah\n• 👔 Aturan seragam & jam sekolah\n• 🎯 Visi & misi sekolah\n• 📞 Kontak sekolah\n\n*Cara pakai:*\nCukup ketik pertanyaan langsung, atau pilih menu. Ketik 'menu' walik kapan aja."
   }
 };
 
@@ -138,6 +138,7 @@ function getWelcomeButtons(name, lang) {
 function getWelcomeList(name, lang) {
   return {
     type: "list",
+    header: lang === "en" ? "🏫 SMKN 2 Mataram" : "🏫 SMKN 2 Mataram",
     text: getString(lang, "welcome", { name }),
     button: getString(lang, "menu_jurusan").startsWith("📚") ? "📋 Pilih Menu" : "📋 Menu",
     sections: [
@@ -148,12 +149,21 @@ function getWelcomeList(name, lang) {
           { id: "menu_spmb", title: getString(lang, "menu_spmb"), description: "Syarat & jadwal pendaftaran" },
           { id: "menu_prestasi", title: getString(lang, "menu_prestasi"), description: "Prestasi sekolah" },
           { id: "menu_ekskul", title: getString(lang, "menu_ekskul"), description: "Kegiatan ekstrakurikuler" },
-          { id: "menu_fasilitas", title: getString(lang, "menu_fasilitas"), description: "Sarana & prasarana" },
-          { id: "menu_beasiswa", title: getString(lang, "menu_beasiswa"), description: "PIP/KIP & beasiswa" }
+          { id: "menu_fasilitas", title: getString(lang, "menu_fasilitas"), description: "Sarana & prasarana" }
         ]
       },
       {
-        title: "🔗 Lainnya",
+        title: "🎓 Sekolah",
+        rows: [
+          { id: "menu_beasiswa", title: getString(lang, "menu_beasiswa"), description: "PIP/KIP & beasiswa" },
+          { id: "menu_visimisi", title: "🎯 Visi & Misi", description: "Visi, misi & tujuan sekolah" },
+          { id: "menu_seragam", title: "👔 Seragam", description: "Aturan seragam harian" },
+          { id: "menu_jamsekolah", title: "⏰ Jam Sekolah", description: "Jadwal masuk & pulang" },
+          { id: "menu_mpls", title: "📢 MPLS", description: "Orientasi siswa baru" }
+        ]
+      },
+      {
+        title: "🔗 Kontak & Bantuan",
         rows: [
           { id: "menu_guru", title: getString(lang, "menu_guru"), description: "Direktori guru & staff" },
           { id: "menu_kontak", title: getString(lang, "menu_kontak"), description: "Alamat, telepon, email" },
@@ -168,8 +178,10 @@ function getWelcomeList(name, lang) {
 function getJurusanList(jurusan, lang) {
   return {
     type: "list",
-    text: lang === "en" ? "Select a major for details:" : "Pilih jurusan untuk detail:",
+    header: lang === "en" ? "📚 Choose a Major" : "📚 Pilih Jurusan",
+    text: lang === "en" ? "Select a major for details:" : "Pilih jurusan untuk info lengkap:",
     button: lang === "en" ? "Majors" : "Jurusan",
+    footer: `SMKN 2 Mataram — ${jurusan.length} program keahlian`,
     sections: [
       {
         title: lang === "en" ? "Majors" : "Daftar Jurusan",

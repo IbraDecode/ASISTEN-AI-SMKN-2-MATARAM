@@ -3,7 +3,7 @@ require("dotenv").config();
 class AppDatabase {
   async init() {
     const [{ PrismaClient }, { PrismaPg }] = await Promise.all([
-      import("../generated/prisma/client.ts"),
+      import("./generated/prisma/client.ts"),
       import("@prisma/adapter-pg")
     ]);
     this.prisma = new PrismaClient({

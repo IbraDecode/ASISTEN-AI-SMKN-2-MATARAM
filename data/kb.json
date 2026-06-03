@@ -14,9 +14,10 @@
     "email": "smkn2mtr@gmail.com",
     "website": "smkn2mataram.sch.id",
     "total_siswa": 1523,
-    "total_guru": 88,
+    "total_guru": 94,
+    "total_pegawai": 29,
     "total_kelas": 48,
-    "sejarah": "Berdiri tahun 1962 sebagai SKOPMA (Sekolah Koperasi Menengah Atas), berubah menjadi SMEA tahun 1968, dan menjadi SMK Negeri 2 Mataram tahun 1998. Awalnya hanya bidang Bisnis Manajemen dan Pariwisata, kini berkembang menjadi 13 kompetensi keahlian di berbagai bidang."
+    "sejarah": "Berdiri tahun 1962 sebagai SKOPMA (Sekolah Koperasi Menengah Atas), berubah menjadi SMEA tahun 1968, dan menjadi SMK Negeri 2 Mataram tahun 1998. Awalnya hanya bidang Bisnis Manajemen dan Pariwisata, kini berkembang menjadi 7 program keahlian unggulan."
   },
   "jurusan": [
     {
@@ -195,13 +196,18 @@
     "info_tambahan": "Pendaftaran dilakukan secara online. Informasi resmi hanya melalui website smkn2mataram.sch.id dan akun resmi sekolah. Hati-hati terhadap penipuan mengatasnamakan panitia SPMB."
   },
   "prestasi": [
-    "Akreditasi A (Sangat Baik)",
-    "Juara 1 LKS (Lomba Kompetensi Siswa) Tingkat Provinsi NTB bidang Web Technology",
-    "Juara 2 LKS Tingkat Provinsi bidang Akuntansi",
-    "Juara 1 Paskibra Tingkat Kota Mataram",
-    "Juara Umum O2SN Tingkat Kota Mataram",
+    "Rapor Pendidikan Terbaik SMA/SMK/SLB Se-Provinsi NTB — AiSO 2025",
+    "Juara 1 Student Percussion Competition Satu Sampan Tingkat Kota Mataram 2024",
+    "Medali Emas Soedirman Short Competition II Nasional bidang Akuntansi & Bahasa Inggris 2024 (Cyntia Clarisa A.)",
+    "Finalis 10 Tim Terbaik MEA 2023 Nasional (dari 435 tim)",
+    "Juara 1 LKS Web Technology Tingkat Provinsi NTB 2023 (Syadad Khairi)",
+    "Juara 1 LKS IT Software Tingkat Provinsi NTB 2023 (Yory Rizki Akbar)",
+    "Juara 1 LKS Cyber Security Tingkat Provinsi NTB 2023 (M. Pandji & M. Ali Akbar)",
+    "Juara 1 Bulu Tangkis Putra O2SN Tingkat Kota Mataram 2023",
+    "Juara 1 Paskibra Tingkat Kota Mataram 2023",
+    "Juara 2 Atraksi Perkusi Tingkat Provinsi NTB 2023",
     "Sekolah Adiwiyata Tingkat Kota",
-    "Sekolah Bebas Narkoba (Program Bersinar)"
+    "Akreditasi A (Sangat Baik)"
   ],
   "fasilitas": [
     { "nama": "Laboratorium Komputer", "jumlah": 4, "keterangan": "Untuk praktik RPL, TKJ, dan umum" },
@@ -258,12 +264,16 @@
     "website": "smkn2mataram.sch.id",
     "alamat": "Jl. Pemuda No. 18, Dasan Agung Baru, Kec. Selaparang, Kota Mataram, NTB 83126",
     "jam_kerja": "Senin - Jumat, 07:30 - 15:00 WITA",
-    "maps_link": "https://maps.google.com/?q=SMKN+2+Mataram+Jl+Pemuda+18"
+    "maps_link": "https://maps.google.com/?q=SMKN+2+Mataram+Jl+Pemuda+18",
+    "facebook": "SMK Negeri 2 Mataram (@smeda.mataram)",
+    "facebook_url": "https://facebook.com/smeda.mataram",
+    "youtube": "SMKN 2 Mataram - Galeri Video",
+    "youtube_url": "https://smkn2mataram.sch.id/video.html"
   },
   "faq": [
     {
       "pertanyaan": "Apa saja jurusan di SMKN 2 Mataram?",
-      "jawaban": "SMKN 2 Mataram memiliki 10+ kompetensi keahlian: Akuntansi (AKL), Manajemen Perkantoran (MPK), Bisnis Digital (BDG), Usaha Perjalanan Wisata (UPW), Rekayasa Perangkat Lunak (RPL), Teknik Komputer dan Jaringan (TKJ), Bisnis Retail (BRT), Lembaga Perbankan Syariah (LPS), Desain Komunikasi Visual (DKV), dan Animasi (ANM)."
+      "jawaban": "SMKN 2 Mataram memiliki 7 program keahlian unggulan: Akuntansi & Keuangan Lembaga (AKL), Manajemen Perkantoran (MPK), Bisnis Digital (BD), Usaha Perjalanan Wisata (UPW), Rekayasa Perangkat Lunak (RPL), Bisnis Retail (BRT), dan Teknik Komputer & Jaringan (TKJ). Ada juga program tambahan: Perbankan Syariah, DKV, Animasi."
     },
     {
       "pertanyaan": "Kapan pendaftaran SPMB dibuka?",
@@ -300,15 +310,274 @@
     {
       "pertanyaan": "Apakah ada beasiswa di SMKN 2?",
       "jawaban": "Ada beberapa program: PIP (Rp1.000.000/tahun) pemegang KIP, KIP Kuliah untuk lanjut PT, dan Beasiswa Prestasi untuk peringkat 10 besar. Semua tidak dipungut biaya."
+    },
+    {
+      "pertanyaan": "Jam berapa masuk sekolah?",
+      "jawaban": "Bel persiapan 07:15, bel masuk 07:30. Senin-Kamis pulang 15:00. Jumat pulang 11:00. Terlambat >15 menit kena sanksi."
+    },
+    {
+      "pertanyaan": "jam berapa masuk",
+      "jawaban": "Bel persiapan 07:15 WITA, bel masuk 07:30 WITA. Senin-Kamis pulang 15:00. Jumat pulang 11:00."
+    },
+    {
+      "pertanyaan": "Apa visi misi SMKN 2 Mataram?",
+      "jawaban": "Visi: Religius, Berprestasi, Mandiri, Berkarakter. Misi: (1) tingkatkan sikap religius, (2) toleransi beragama, (3) pembelajaran kreatif-inovatif, (4) gali potensi prestasi, (5) jiwa wirausaha, (6) SDM kompeten & kreatif, (7) jujur-disiplin, (8) patriotisme & cinta lingkungan."
+    },
+    {
+      "pertanyaan": "Apakah SMKN 2 Mataram menerima siswa pindahan?",
+      "jawaban": "Ya, menerima siswa pindahan dengan syarat: surat pindah dari sekolah asal, rapor, surat keterangan sehat, dan mengikuti tes penempatan. Tergantung ketersediaan kuota di jurusan yang dituju. Hubungi bagian kesiswaan atau BK untuk info lengkap."
+    },
+    {
+      "pertanyaan": "Seragam apa yang dipakai hari Senin sampai Jumat?",
+      "jawaban": "Senin: seragam OSIS (putih abu + atribut). Selasa: batik sekolah. Rabu: putih abu-abu biasa. Kamis: batik/pramuka. Jumat: pakaian muslim/olahraga. Siswi berjilbab putih Senin-Rabu, bebas hari lain. Info lengkap di menu 'Seragam'."
+    },
+    {
+      "pertanyaan": "Apakah wajib ikut ekstrakurikuler?",
+      "jawaban": "Ya, setiap siswa WAJIB mengikuti minimal SATU ekstrakurikuler. Ekstrakurikuler wajib adalah Pramuka (kelas 10). Selain itu bisa pilih: Paskibra, PMR, Basket, Voli, Futsal, Silat, Seni Musik, Tari, English Club, dan Rohis."
+    },
+    {
+      "pertanyaan": "Boleh bawa HP ke sekolah?",
+      "jawaban": "Siswa diperbolehkan membawa HP untuk keperluan belajar. HP digunakan saat jam pelajaran tertentu dengan izin guru. DILARANG: main game, medsos, atau merekam tanpa izin saat jam pelajaran. HP disita jika melanggar."
+    },
+    {
+      "pertanyaan": "Apakah ada kegiatan MPLS?",
+      "jawaban": "Ya, MPLS (Masa Pengenalan Lingkungan Sekolah) selama 3 hari sebelum KBM dimulai. Kegiatan: pengenalan sekolah, guru, jurusan, fasilitas, ekskul, materi anti-bullying, dan narkoba. DILARANG: perploncoan, bawas senjata, pungli."
+    },
+    {
+      "pertanyaan": "Berapa jumlah siswa SMKN 2 Mataram?",
+      "jawaban": "Total sekitar 1.523 siswa dengan 48 kelas dan 88 guru. Rata-rata 32 siswa per kelas."
+    },
+    {
+      "pertanyaan": "Apa prestasi terbaru SMKN 2 Mataram?",
+      "jawaban": "Prestasi terbaru 2024-2025: Rapor Pendidikan Terbaik SMA/SMK/SLB Se-Provinsi NTB (AiSO 2025). Juara 1 Perkusi Tingkat Kota 2024. Medali Emas Nasional Soedirman Short Competition 2024. Juara 1 LKS Web Technology, IT Software, Cyber Security 2023. Finalis MEA Nasional 2023. Akreditasi A."
+    },
+    {
+      "pertanyaan": "Apakah ada bantuan untuk siswa kurang mampu?",
+      "jawaban": "Ada. PIP (Rp1.000.000/tahun) untuk pemegang KIP, Bantuan Langsung sekolah untuk siswa tidak mampu, KIP Kuliah untuk lanjut PT, dan program beasiswa prestasi."
+    },
+    {
+      "pertanyaan": "Bagaimana cara daftar ulang setelah diterima?",
+      "jawaban": "Daftar ulang dilakukan setelah pengumuman hasil seleksi. Bawa: fotokopi KK, akta, ijazah/SKL, pas foto 3x4 (4 lembar), dan surat sehat. Informasi lengkap di pengumuman resmi sekolah."
+    },
+    {
+      "pertanyaan": "Apa itu jalur zonasi?",
+      "jawaban": "Jalur zonasi adalah jalur pendaftaran berdasarkan jarak tempat tinggal ke sekolah. Kuota minimal 50% dari daya tampung. Prioritas untuk siswa yang berdomisili di Kecamatan Selaparang dan sekitarnya."
+    },
+    {
+      "pertanyaan": "Apakah ada tes buta warna untuk masuk?",
+      "jawaban": "Ya, untuk jurusan tertentu: DKV, Animasi, dan TKJ mewajibkan tes buta warna. Siswa buta warna parsial mungkin tetap bisa masuk dengan pertimbangan tertentu."
+    },
+    {
+      "pertanyaan": "Seragam hari Senin",
+      "jawaban": "Senin: seragam OSIS putih abu-abu lengkap atribut (topi, dasi, sabuk, sepatu hitam, kaus kaki putih, nama di dada). Siswi: rok abu-abu + jilbab putih."
+    },
+    {
+      "pertanyaan": "Seragam hari Selasa",
+      "jawaban": "Selasa: seragam batik sekolah. Celana/rok abu-abu. Sepatu hitam."
+    },
+    {
+      "pertanyaan": "Seragam hari Rabu",
+      "jawaban": "Rabu: seragam putih abu-abu biasa (tanpa atribut OSIS)."
+    },
+    {
+      "pertanyaan": "Seragam hari Kamis",
+      "jawaban": "Kamis: batik sekolah atau pramuka, tergantung jadwal."
+    },
+    {
+      "pertanyaan": "Seragam hari Jumat",
+      "jawaban": "Jumat: pakaian muslim/muslimah. Yang ada jadwal olahraga pakai baju olahraga."
+    },
+    {
+      "pertanyaan": "Jam masuk sekolah jam berapa",
+      "jawaban": "Bel persiapan 07:15, bel masuk 07:30. Senin-Kamis pulang 15:00 (istirahat 09:30-09:50 & 12:00-12:40). Jumat pulang 11:00. Terlambat >15 menit kena sanksi."
+    },
+    {
+      "pertanyaan": "Pulang sekolah jam berapa",
+      "jawaban": "Senin-Kamis pulang 15:00 WITA. Jumat pulang 11:00 WITA."
+    },
+    {
+      "pertanyaan": "Apa saja jurusan",
+      "jawaban": "7 program keahlian: AKL (Akuntansi), MPK (Perkantoran), BD (Bisnis Digital), UPW (Wisata), RPL (Software), BRT (Retail), TKJ (Jaringan)."
+    },
+    {
+      "pertanyaan": "Info RPL",
+      "jawaban": "RPL (Rekayasa Perangkat Lunak): belajar coding, web, mobile, database. Prospek: Web Developer, Mobile Developer, Software Engineer."
+    },
+    {
+      "pertanyaan": "Info TKJ",
+      "jawaban": "TKJ (Teknik Komputer dan Jaringan): belajar jaringan, server, router, keamanan. Prospek: Network Engineer, IT Support, System Admin."
+    },
+    {
+      "pertanyaan": "Info AKL",
+      "jawaban": "AKL (Akuntansi dan Keuangan Lembaga): belajar akuntansi, pajak, komputer akuntansi. Prospek: Staf Akuntansi, Finance, Tax Consultant."
+    },
+    {
+      "pertanyaan": "Kapan pendaftaran SPMB",
+      "jawaban": "Pendaftaran SPMB dibuka April-Mei setiap tahun. Pengumuman Juni-Juli. Pantau smkn2mataram.sch.id untuk info resmi."
+    },
+    {
+      "pertanyaan": "Cara daftar SMKN 2 Mataram",
+      "jawaban": "Daftar online via portal SPMB. Siapkan: KK, Akta Lahir, pas foto 3x4 (merah), rapor SMP semester 1-5, surat sehat. Jalur: Zonasi (50%), Afirmasi (15%), Pindah Tugas (5%), Prestasi (30%)."
+    },
+    {
+      "pertanyaan": "Biaya sekolah SMKN 2",
+      "jawaban": "GRATIS! SMKN 2 Mataram negeri, tidak ada SPP. Hanya biaya sukarela untuk seragam, buku, kegiatan. Ada PIP (Rp1jt/tahun) & KIP untuk yang kurang mampu."
+    },
+    {
+      "pertanyaan": "biaya masuk smk",
+      "jawaban": "GRATIS! Tidak ada SPP. SMKN 2 Mataram sekolah negeri. Hanya bayar sukarela untuk seragam dan buku. Ada bantuan PIP/KIP."
+    },
+    {
+      "pertanyaan": "Alamat SMKN 2 Mataram",
+      "jawaban": "Jl. Pemuda No. 18, Dasan Agung Baru, Kec. Selaparang, Kota Mataram, NTB 83126. Telepon: 0370 633654. Email: smkn2mtr@gmail.com."
+    },
+    {
+      "pertanyaan": "Jam istirahat sekolah",
+      "jawaban": "Istirahat 1: 09:30 - 09:50 WITA. Istirahat 2 (shalat): 12:00 - 12:40 WITA."
+    },
+    {
+      "pertanyaan": "Berapa jumlah guru SMKN 2",
+      "jawaban": "Total 94 guru (38 PNS, 45 P3K, 11 tidak tetap) dan 29 pegawai. Total 123 orang guru dan pegawai."
+    },
+    {
+      "pertanyaan": "Alamat SMKN 2 Mataram dimana",
+      "jawaban": "Jl. Pemuda No. 18, Dasan Agung Baru, Kec. Selaparang, Kota Mataram, NTB 83126. Telepon: 0370 633654. Email: smkn2mtr@gmail.com."
+    },
+    {
+      "pertanyaan": "Lokasi SMKN 2 Mataram",
+      "jawaban": "Jl. Pemuda No. 18, Dasan Agung Baru, Kec. Selaparang, Kota Mataram, NTB 83126. Dekat pusat kota, akses mudah."
+    },
+    {
+      "pertanyaan": "alamat sekolah smkn 2 mataram",
+      "jawaban": "Jl. Pemuda No. 18, Dasan Agung Baru, Kec. Selaparang, Kota Mataram, NTB 83126. Telepon: 0370 633654. Email: smkn2mtr@gmail.com."
+    },
+    {
+      "pertanyaan": "Pulang sekolah jam",
+      "jawaban": "Senin-Kamis pulang 15:00 WITA. Jumat pulang 11:00 WITA."
+    },
+    {
+      "pertanyaan": "pulang jam berapa sekolah",
+      "jawaban": "Senin-Kamis: pulang 15:00. Jumat: pulang 11:00. Istirahat 09:30-09:40 & 12:00-12:40."
+    },
+    {
+      "pertanyaan": "Apa itu RPL",
+      "jawaban": "RPL (Rekayasa Perangkat Lunak): jurusan yang belajar coding, pengembangan web, mobile, dan database. Prospek kerja: Web Developer, Mobile Developer, Software Engineer, UI/UX Designer."
+    },
+    {
+      "pertanyaan": "Apa itu TKJ",
+      "jawaban": "TKJ (Teknik Komputer dan Jaringan): jurusan yang belajar jaringan komputer, server, router, dan keamanan jaringan. Prospek kerja: Network Engineer, IT Support, System Administrator."
+    },
+    {
+      "pertanyaan": "Apa itu AKL",
+      "jawaban": "AKL (Akuntansi dan Keuangan Lembaga): jurusan yang belajar akuntansi, pajak, dan komputer akuntansi. Prospek kerja: Staf Akuntansi, Finance Staff, Tax Consultant."
+    },
+    {
+      "pertanyaan": "Apa itu BD",
+      "jawaban": "BD (Bisnis Digital): jurusan yang belajar pemasaran digital, e-commerce, social media marketing, dan content creation. Prospek: Digital Marketer, Social Media Specialist, Content Creator."
+    },
+    {
+      "pertanyaan": "Apa itu UPW",
+      "jawaban": "UPW (Usaha Perjalanan Wisata): jurusan pariwisata, belajar tour guiding, travel agent, reservasi tiket, dan hospitality. Prospek: Tour Guide, Travel Agent, staf hotel."
+    },
+    {
+      "pertanyaan": "Apa itu BRT",
+      "jawaban": "BRT (Bisnis Retail): jurusan yang belajar manajemen retail, merchandising, customer service, dan visual merchandising. Prospek: Store Manager, Merchandiser, Sales Associate."
+    },
+    {
+      "pertanyaan": "kontak smkn 2 mataram",
+      "jawaban": "📍 Jl. Pemuda No. 18, Dasan Agung Baru, Kec. Selaparang, Kota Mataram, NTB 83126\n📞 0370 633654\n📧 smkn2mtr@gmail.com\n🌐 smkn2mataram.sch.id\n⏰ Senin-Jumat 07:30-15:00 WITA"
+    },
+    {
+      "pertanyaan": "nomor telepon sekolah",
+      "jawaban": "Telepon: 0370 633654 | Fax: 0370 629654 | Email: smkn2mtr@gmail.com"
+    },
+    {
+      "pertanyaan": "facebook smkn 2 mataram",
+      "jawaban": "FB: SMK Negeri 2 Mataram (@smeda.mataram) — https://facebook.com/smeda.mataram"
+    },
+    {
+      "pertanyaan": "youtube smkn 2 mataram",
+      "jawaban": "Galeri video SMKN 2 Mataram: https://smkn2mataram.sch.id/video.html"
+    },
+    {
+      "pertanyaan": "sosial media sekolah",
+      "jawaban": "FB: @smeda.mataram | Web: smkn2mataram.sch.id | Email: smkn2mtr@gmail.com | Telp: 0370 633654"
+    },
+    {
+      "pertanyaan": "jumlah siswa smkn 2",
+      "jawaban": "Total ±1.523 siswa (592 laki-laki, 931 perempuan) di 48 kelas. Rata-rata 32 siswa/kelas."
+    },
+    {
+      "pertanyaan": "jumlah guru smkn 2 mataram",
+      "jawaban": "Total 94 guru (38 PNS, 45 P3K, 11 tidak tetap) + 29 pegawai = 123 orang."
+    },
+    {
+      "pertanyaan": "kepala sekolah smkn 2 mataram",
+      "jawaban": "Kepala Sekolah: H. Munawar, S.Sos., S.Kom., M.M. | Komite: Drs. TGH. Muhtar | Operator: Jadiawan."
+    },
+    {
+      "pertanyaan": "akreditasi smkn 2 mataram",
+      "jawaban": "Akreditasi A (Sangat Baik). SK: 053/BAN-SM/SK/2019. Berdiri: 2 Januari 1968. NPSN: 50204506."
+    },
+    {
+      "pertanyaan": "sejarah smkn 2 mataram",
+      "jawaban": "Berdiri 1962 sebagai SKOPMA (Sekolah Koperasi), 1968 jadi SMEA, 1998 jadi SMKN 2 Mataram. Dulu cuma Bisnis & Pariwisata, sekarang 7 program keahlian unggulan."
     }
   ],
+  "visi_misi": {
+    "visi": "Religius, Berprestasi, Mandiri, Berkarakter",
+    "visi_panjang": "Terwujudnya sumber daya manusia yang religius, berprestasi, mandiri, dan berkarakter.",
+    "misi": [
+      "Meningkatkan sikap dan perilaku religius",
+      "Memupuk dan mengembangkan sikap toleransi intra dan antar umat beragama",
+      "Melaksanakan proses pembelajaran yang kreatif, inovatif, demokratis dan menyenangkan",
+      "Menggali dan membina potensi diri serta memfasilitasi warga sekolah untuk berprestasi",
+      "Membentuk tamatan yang berjiwa wirausaha, mampu membangun kerjasama, dan berani menanggung resiko",
+      "Menyiapkan sumber daya manusia yang kompeten, kreatif, dan berdaya saing",
+      "Menumbuhkan perilaku jujur, disiplin, kerja keras, dan bertanggungjawab",
+      "Menumbuhkan semangat patriotisme, cinta tanah air dan peduli lingkungan"
+    ],
+    "tujuan": "Menghasilkan lulusan yang beriman, kompeten, berdaya saing, dan siap bekerja atau melanjutkan ke jenjang pendidikan tinggi."
+  },
+  "seragam": {
+    "senin": "Seragam OSIS (Putih abu-abu lengkap dengan atribut OSIS)",
+    "selasa": "Seragam batik sekolah",
+    "rabu": "Seragam putih abu-abu (biasa)",
+    "kamis": "Seragam batik sekolah atau pramuka",
+    "jumat": "Pakaian muslim/muslimah atau olahraga",
+    "keterangan": "Celana/rok abu-abu untuk semua hari. Atribut lengkap termasuk topi dan dasi. Khusus hari Jumat olahraga, membawa baju olahraga.",
+    "atribut_wajib": ["Topi sekolah", "Dasi sekolah", "Sabuk sekolah", "Sepatu hitam", "Kaus kaki putih", "Nama di dada"],
+    "khusus_siswi": "Rok abu-abu (panjang) dan jilbab putih untuk hari Senin-Rabu, jilbab bebas untuk hari lain."
+  },
+  "jam_sekolah": {
+    "senin_kamis": "07:30 - 15:00 WITA",
+    "jumat": "07:30 - 11:00 WITA",
+    "istirahat": "09:30 - 09:50 (istirahat 1), 12:00 - 12:40 (istirahat 2 / shalat)",
+    "keterangan": "Jam masuk 07:15 (bel persiapan), 07:30 (bel masuk). Keterlambatan lebih dari 15 menit dicatat dan mendapat sanksi."
+  },
+  "mpls": {
+    "deskripsi": "Masa Pengenalan Lingkungan Sekolah (MPLS) dilaksanakan setiap tahun ajaran baru selama 3 hari sebelum kegiatan belajar mengajar dimulai.",
+    "kegiatan": ["Pengenalan lingkungan sekolah", "Pengenalan guru dan staff", "Pengenalan jurusan dan fasilitas", "Pengenalan ekskul", "Materi anti-bullying", "Materi narkoba dan kenakalan remaja"],
+    "larangan": ["Perploncoan dalam bentuk apapun", "Membawa senjata tajam/API", "Membawa kendaraan pribadi (untuk siswa baru)", "Pungutan liar oleh senior"],
+    "atribut": "Atribut akan diinfokan saat pendaftaran ulang. Umumnya: baju putih, celana/rok hitam, sepatu hitam, topi MPLS."
+  },
+  "alumni": {
+    "jumlah_alumni": "10.000+ lulusan sejak 1968",
+    "asosiasi": "IKA SMKN 2 Mataram (Ikatan Keluarga Alumni)",
+    "sebaran": "Tersebar di berbagai provinsi di Indonesia dan beberapa negara (Malaysia, Jepang, Korea, Australia)",
+    "profesi": ["PNS", "Karyawan BUMN/Swasta", "Wirausaha", "Tenaga Kesehatan", "Pendidik", "Profesional IT", "Seniman/Kreatif"]
+  },
   "struktur_organisasi": {
     "kepala_sekolah": "H. Munawar, S.Sos., S.Kom., M.M.",
-    "wakasek_kurikulum": "Guru Senior",
+    "wakasek_kurikulum": "Dading Qalbuadi, ST",
     "wakasek_kesiswaan": "Guru Senior",
     "wakasek_humas": "Guru Senior",
     "wakasek_sarpras": "Guru Senior",
+    "komite_sekolah": "Drs. TGH. Muhtar",
     "operator_sekolah": "Jadiawan",
-    "bimbingan_konseling": "Tim BK"
+    "bimbingan_konseling": "Tim BK",
+    "total_guru": "94 guru (38 PNS, 45 P3K, 11 tidak tetap)",
+    "total_pegawai": "29 orang",
+    "jurusans": ["AKL", "MPK", "BD", "UPW", "RPL", "BRT", "TKJ"]
   }
 }
