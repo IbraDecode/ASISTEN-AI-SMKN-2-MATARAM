@@ -18,6 +18,8 @@ class AppDatabase {
       adapter: new PrismaPg(pool)
     });
     await withTimeout(this.prisma.$connect(), DB_TIMEOUT, "Database connection timeout");
+    // Verify credentials with a lightweight query
+    await withTimeout(this.prisma.$queryRaw`SELECT 1`, DB_TIMEOUT, "Database auth query timeout");
     return this;
   }
 
