@@ -1,0 +1,17 @@
+{
+  "name": "smkn2-ai-assistant",
+  "version": "1.0.0",
+  "description": "AI Assistant SMKN 2 Mataram - WhatsApp Chatbot",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "train": "node train/ingest.js",
+    "dev": "node src/server.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.10.0",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "node-fetch": "^2.7.0"
+  }
+}
