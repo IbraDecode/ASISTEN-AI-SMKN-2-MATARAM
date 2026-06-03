@@ -456,6 +456,7 @@ app.get("/health", (req, res) => {
     status: "ok",
     uptime: process.uptime(),
     memory: process.memoryUsage().rss,
+    gemini: GeminiClient.getCircuitState ? GeminiClient.getCircuitState() : { open: false },
     ...stats
   });
 });

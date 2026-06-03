@@ -1,19 +1,27 @@
 const nodeFetch = require("node-fetch");
 
+// ─── Global token cache ───
+const tokenCache = { tokens: null, lastFetch: 0, ttl: 5 * 60 * 1000 };
+const circuitState = { failures: 0, lastFail: 0, threshold: 5, cooldown: 60 * 1000 };
+const USER_AGENTS = [
+  "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Mobile Safari/537.36",
+  "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36",
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+  "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+];
+let uaIndex = 0;
+
 class GeminiClient {
   constructor(opts = {}) {
-    this.tokens = null;
     this.reqId = 1;
     this.context = "";
     this.conversationId = null;
     this.responseId = null;
     this.lastMeta = null;
 
-    this.timeout = opts.timeout || 15000;
+    this.timeout = opts.timeout || 20000;
     this.maxRetries = opts.maxRetries || 2;
-    this.userAgent =
-      opts.userAgent ||
-      "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Mobile Safari/537.36";
+    this.userAgent = opts.userAgent || USER_AGENTS[uaIndex++ % USER_AGENTS.length];
   }
 
   setContext(ctx) {
@@ -21,18 +29,24 @@ class GeminiClient {
   }
 
   async _fetchTokens() {
+    const now = Date.now();
+    if (tokenCache.tokens && (now - tokenCache.lastFetch) < tokenCache.ttl) {
+      return tokenCache.tokens;
+    }
+
     const res = await nodeFetch("https://gemini.google.com/", {
       headers: { "user-agent": this.userAgent },
-      timeout: 10000
+      signal: AbortSignal.timeout(10000)
     });
     const html = await res.text();
 
-    this.tokens = {
-      bl: this._extract(html, '"cfb2h":"', '"'),
-      fsid: this._extract(html, '"FdrFJe":"', '"')
+    tokenCache.tokens = {
+      bl: this._extract(html, '"cfb2h":"', '"') || this._extract(html, 'cfb2h', '\\u003d') || "boq_assistant-bard-web-server_20260602.11_p0",
+      fsid: this._extract(html, '"FdrFJe":"', '"') || this._extract(html, 'FdrFJe', '"')
     };
+    tokenCache.lastFetch = now;
 
-    return this.tokens;
+    return tokenCache.tokens;
   }
 
   _extract(text, prefix, suffix) {
@@ -41,6 +55,15 @@ class GeminiClient {
     const start = idx + prefix.length;
     const end = text.indexOf(suffix, start);
     return end === -1 ? "" : text.substring(start, end);
+  }
+
+  _isCircuitOpen() {
+    const now = Date.now();
+    if (circuitState.failures >= circuitState.threshold) {
+      if ((now - circuitState.lastFail) < circuitState.cooldown) return true;
+      circuitState.failures = 0;
+    }
+    return false;
   }
 
   _buildPayload(msg) {
@@ -65,16 +88,26 @@ class GeminiClient {
   }
 
   async ask(msg) {
+    if (this._isCircuitOpen()) {
+      throw new Error("Gemini circuit breaker open — too many failures");
+    }
+
     let lastError;
 
     for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
       try {
-        return await this._askOnce(msg);
+        const result = await this._askOnce(msg);
+        circuitState.failures = 0;
+        return result;
       } catch (err) {
         lastError = err;
+        circuitState.failures++;
+        circuitState.lastFail = Date.now();
+
         const errStr = err.message.toLowerCase();
         if (errStr.includes("token") || errStr.includes("403") || errStr.includes("401") || errStr.includes("refresh")) {
-          this.tokens = null;
+          tokenCache.tokens = null;
+          tokenCache.lastFetch = 0;
           if (attempt < this.maxRetries) {
             await new Promise((r) => setTimeout(r, 500));
             continue;
@@ -101,12 +134,12 @@ class GeminiClient {
   }
 
   async _askOnce(msg) {
-    if (!this.tokens || !this.tokens.fsid) await this._fetchTokens();
+    if (!tokenCache.tokens || !tokenCache.tokens.fsid || !tokenCache.tokens.bl) await this._fetchTokens();
 
     const payload = this._buildPayload(msg);
     const params = new URLSearchParams({
-      bl: this.tokens.bl || "boq_assistant-bard-web-server_20260602.11_p0",
-      "f.sid": this.tokens.fsid,
+      bl: tokenCache.tokens.bl,
+      "f.sid": tokenCache.tokens.fsid,
       hl: "id",
       _reqid: this.reqId++,
       rt: "c"
@@ -236,6 +269,20 @@ class GeminiClient {
     this.responseId = null;
     this.reqId = 1;
     this.lastMeta = null;
+  }
+
+  static getCircuitState() {
+    return {
+      open: circuitState.failures >= circuitState.threshold,
+      failures: circuitState.failures,
+      threshold: circuitState.threshold,
+      cooldownRemaining: circuitState.lastFail ? Math.max(0, circuitState.cooldown - (Date.now() - circuitState.lastFail)) : 0
+    };
+  }
+
+  static resetCircuit() {
+    circuitState.failures = 0;
+    circuitState.lastFail = 0;
   }
 }
 
