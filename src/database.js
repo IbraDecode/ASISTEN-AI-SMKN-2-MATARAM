@@ -1,13 +1,23 @@
 require("dotenv").config();
+const { Pool } = require("pg");
 const { PrismaClient } = require("./generated/prisma/client.js");
 const { PrismaPg } = require("@prisma/adapter-pg");
 
+const DB_TIMEOUT = 5000;
+
 class AppDatabase {
   async init() {
-    this.prisma = new PrismaClient({
-      adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
+    if (!process.env.DATABASE_URL) {
+      throw new Error("DATABASE_URL is not set");
+    }
+    const pool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+      connectionTimeoutMillis: DB_TIMEOUT
     });
-    await this.prisma.$connect();
+    this.prisma = new PrismaClient({
+      adapter: new PrismaPg(pool)
+    });
+    await withTimeout(this.prisma.$connect(), DB_TIMEOUT, "Database connection timeout");
     return this;
   }
 
@@ -206,6 +216,13 @@ class AppDatabase {
   async close() {
     if (this.prisma) await this.prisma.$disconnect();
   }
+}
+
+function withTimeout(promise, ms, msg) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error(msg)), ms))
+  ]);
 }
 
 module.exports = AppDatabase;
