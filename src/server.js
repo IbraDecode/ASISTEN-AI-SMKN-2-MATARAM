@@ -41,9 +41,11 @@ if (!process.env.VERCEL) {
 const streamer = new Streamer(whatsapp);
 const rateLimiter = new RateLimiter();
 const lastMessageId = {};
+const lastFeedbackAt = {};
 const aiPool = {};
 const AI_POOL_TTL = 30 * 60 * 1000; // 30 menit expired
 const aiPoolTimestamps = {};
+const FEEDBACK_COOLDOWN_MS = 10 * 60 * 1000;
 
 function getAI(userId) {
   if (!aiPool[userId]) {
@@ -112,20 +114,26 @@ async function autoLearnFromAI() {
 
 async function handleIncoming(from, name, rawText, isButton, buttonId) {
   const dbSession = await db.getOrCreateSession(from);
-  const lang = dbSession.language || "id";
+  let lang = dbSession.language || "id";
   const text = sanitize(rawText || "");
 
   if (isButton && buttonId) {
     return handleButton(from, name, buttonId, dbSession, lang);
   }
 
-  if (dbSession.message_count === 0) {
+  if (dbSession.message_count === 0 && text.match(/^(hai|halo|hello|hi|assalamualaikum|menu|start|mulai)$/i)) {
     await db.updateSession(from, { message_count: 1, state: "MENU" });
     return getWelcomeList(name || from, lang);
   }
 
   if (text.match(/^(bahasa|language|lang|\/language|\/bahasa)/i)) {
     return getLanguageMenu(lang);
+  }
+
+  const requestedLang = detectLanguagePreference(text);
+  if (requestedLang && requestedLang !== lang) {
+    lang = requestedLang;
+    await db.updateSession(from, { language: requestedLang });
   }
 
   if (text.match(/^(help|bantuan|tolong|\/help|\/bantuan)$/i)) {
@@ -231,12 +239,7 @@ async function handleButton(from, name, buttonId, dbSession, lang) {
         text: `👨‍🏫 *${lang === "en" ? "Teachers & Staff" : "Guru & Staff SMKN 2 Mataram"}*\n\n${Object.entries(so).map(([k, v]) => `• ${k.replace(/_/g, " ").toUpperCase()}: ${v}`).join("\n")}`
       };
     },
-    menu_kontak: () => ({
-      type: "location_and_cta",
-      text: `📍 *Alamat*\n${d.kontak.alamat}\n\n📞 ${d.kontak.telepon}\n📧 ${d.kontak.email}\n🌐 ${d.kontak.website}\n⏰ ${d.kontak.jam_kerja}\n\n📱 FB: ${d.kontak.facebook || "smeda.mataram"}\n🎥 YouTube: smkn2mataram.sch.id`,
-      location: { lat: -8.5833, lng: 116.1167, name: "SMKN 2 Mataram", address: d.kontak.alamat },
-      cta: { url: "https://smkn2mataram.sch.id", label: lang === "en" ? "🌐 Visit Website" : "🌐 Kunjungi Website" }
-    }),
+    menu_kontak: () => buildContactReply(lang),
     menu_bantuan: () => ({
       type: "text",
       text: getString(lang, "help_text", { name: name || from, menu: "" })
@@ -296,25 +299,163 @@ async function handleButton(from, name, buttonId, dbSession, lang) {
   return getWelcomeList(name || from, lang);
 }
 
+function isContactOrLocationQuery(text) {
+  const q = text.toLowerCase().trim();
+  return /\b(kontak|contact|telepon|telp|phone|email|hubungi|alamat|lokasi|lokasin|location|maps?|google maps|dimana|taok)\b/.test(q)
+    || /\b(lek|di)\s+mbe\b.*\b(smk\s*2|smkn\s*2|sekolah)\b/.test(q);
+}
+
+function isLocationQuery(text) {
+  const q = text.toLowerCase().trim();
+  return /\b(alamat|lokasi|lokasin|location|maps?|google maps|dimana|taok)\b/.test(q)
+    || /\b(lek|di)\s+mbe\b.*\b(smk\s*2|smkn\s*2|sekolah)\b/.test(q);
+}
+
+function isIncompleteAiReply(text) {
+  const cleaned = String(text || "").trim();
+  if (cleaned.length < 12) return true;
+  return /^(saya|aku|i am|i'm|i)$/i.test(cleaned);
+}
+
+function isSpmbQuery(text) {
+  const q = text.toLowerCase().trim();
+  return /\b(spmb|ppdb|pendaftaran|daftar|murid baru|siswa baru|peserta didik baru)\b/.test(q);
+}
+
+function detectLanguagePreference(text) {
+  const q = text.toLowerCase().trim();
+  if (/\b(bahasa|basa|base|boso)\s+(lombok|sasak)\b/.test(q) || /\b(lombok|sasak)\b.*\b(bahasa|basa|base|boso)\b/.test(q)) {
+    return "sas";
+  }
+  if (/\b(bahasa|basa|base)\s+indonesia\b/.test(q)) return "id";
+  if (/\b(english|bahasa inggris)\b/.test(q)) return "en";
+  return null;
+}
+
+function buildSpmbReply(lang) {
+  const d = kb.data;
+  const spmb = d.spmb;
+  const text = lang === "en"
+    ? `*SPMB SMKN 2 Mataram*\n\nRegistration for new students is currently open based on the latest school operational info. Register via the official SPMB channel announced by the school/province, and verify details through the official school website or contact.\n\nRequirements: ${spmb.persyaratan_umum.join("; ")}\n\nDocuments: ${spmb.berkas_pendaftaran.join("; ")}\n\nContact: ${d.kontak.telepon} | ${d.kontak.email}\nWebsite: ${d.kontak.website}`
+    : `*SPMB SMKN 2 Mataram*\n\nPendaftaran murid baru saat ini sudah dibuka berdasarkan info operasional terbaru sekolah. Daftar melalui kanal/portal SPMB resmi yang diumumkan sekolah atau provinsi, lalu cek ulang detailnya di website resmi sekolah atau kontak sekolah.\n\nSyarat umum: ${spmb.persyaratan_umum.join("; ")}\n\nBerkas: ${spmb.berkas_pendaftaran.join("; ")}\n\nKontak: ${d.kontak.telepon} | ${d.kontak.email}\nWebsite: ${d.kontak.website}`;
+  return {
+    type: "text_and_cta",
+    text,
+    source: "kb",
+    topic: lang === "en" ? "Admission" : "SPMB / Pendaftaran",
+    cta: { url: d.kontak.website, label: "Info Resmi", text: "Buka website resmi SMKN 2 Mataram untuk info SPMB terbaru." }
+  };
+}
+
+function shouldAskFeedback(from, reply) {
+  if (!reply || reply.noFeedback) return false;
+  if (reply.source !== "ai") return false;
+  if (!reply.text || String(reply.text).length < 220) return false;
+  const now = Date.now();
+  if (now - (lastFeedbackAt[from] || 0) < FEEDBACK_COOLDOWN_MS) return false;
+  lastFeedbackAt[from] = now;
+  return true;
+}
+
+function buildContactReply(lang, locationOnly = false) {
+  const d = kb.data.kontak;
+  const phone = d.telepon.replace(/[^0-9]/g, "");
+  const text = locationOnly
+    ? lang === "sas"
+      ? `📍 *Lokasi SMKN 2 Mataram*\nTaok sekolah: ${d.alamat}\n\nGoogle Maps:\n${d.maps_link}\n\n📞 Telepon/Fax: ${d.telepon}\n🌐 Website: ${d.website}`
+      : `📍 *Lokasi SMKN 2 Mataram*\n${d.alamat}\n\nGoogle Maps:\n${d.maps_link}\n\n📞 Telepon/Fax: ${d.telepon}\n🌐 Website: ${d.website}`
+    : lang === "sas"
+      ? `📞 *Kontak Resmi SMKN 2 Mataram*\n\n📍 Taok: ${d.alamat}\n📞 Telepon/Fax: ${d.telepon}\n📧 Email: ${d.email}\n🌐 Website: ${d.website}\n⏰ Jam kerja: ${d.jam_kerja}\n\nGoogle Maps:\n${d.maps_link}\n\nSumber: ${d.sumber_resmi || d.website}`
+      : `📞 *Kontak Resmi SMKN 2 Mataram*\n\n📍 Alamat: ${d.alamat}\n📞 Telepon/Fax: ${d.telepon}\n📧 Email: ${d.email}\n🌐 Website: ${d.website}\n⏰ Jam kerja: ${d.jam_kerja}\n\nGoogle Maps:\n${d.maps_link}\n\nSumber: ${d.sumber_resmi || d.website}`;
+
+  if (!locationOnly) {
+    return {
+      type: "contact_and_cta",
+      text,
+      source: "kb",
+      topic: lang === "en" ? "Contact & Address" : "Kontak & Alamat",
+      contact: {
+        name: {
+          formatted_name: "SMKN 2 Mataram",
+          first_name: "SMKN 2 Mataram"
+        },
+        org: {
+          company: "SMK Negeri 2 Mataram",
+          department: "Humas",
+          title: "Kontak Resmi Sekolah"
+        },
+        phones: [{ phone, type: "WORK" }],
+        emails: d.email.split(",").map(email => ({ email: email.trim(), type: "WORK" })),
+        urls: [{ url: d.website, type: "WORK" }],
+        addresses: [{
+          street: d.alamat,
+          city: "Mataram",
+          state: "Nusa Tenggara Barat",
+          zip: "831125",
+          country: "Indonesia",
+          country_code: "ID",
+          type: "WORK"
+        }]
+      },
+      cta: { url: d.website, label: "Buka Website", text: "Buka website resmi SMKN 2 Mataram untuk informasi terbaru." }
+    };
+  }
+
+  return {
+    type: "location_and_cta",
+    text,
+    source: "kb",
+    topic: lang === "en" ? "Contact & Address" : "Kontak & Alamat",
+    location: { lat: -8.5833, lng: 116.1167, name: "SMKN 2 Mataram", address: d.alamat },
+    cta: { url: d.maps_link, label: "Buka Maps", text: "Buka lokasi SMKN 2 Mataram di Google Maps." }
+  };
+}
+
+function getCurrentWitaContext() {
+  const value = new Intl.DateTimeFormat("id-ID", {
+    timeZone: "Asia/Makassar",
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZoneName: "short"
+  }).format(new Date());
+  return `\n\nWaktu saat ini untuk konteks lokal sekolah: ${value}. Gunakan zona waktu WITA/Asia Makassar saat menjawab pertanyaan waktu.`;
+}
+
+function buildNumberContext(messages) {
+  const snippets = (messages || [])
+    .filter(m => /\d/.test(m.content || ""))
+    .slice(-5)
+    .map(m => {
+      const content = String(m.content || "").replace(/\s+/g, " ").substring(0, 260);
+      return `${m.role === "user" ? "User" : "AI"}: ${content}`;
+    });
+  if (snippets.length === 0) return "";
+  return `\n\nAngka/nilai yang sudah disebut di percakapan terbaru:\n${snippets.join("\n")}\nJika pengguna bertanya lanjutan tentang total, rata-rata, peluang, atau nilai, gunakan angka dari riwayat ini. Jika angka yang dibutuhkan belum cukup, minta pengguna mengirim daftar nilainya, jangan mengatakan tidak punya akses ke data pribadi jika angkanya sudah ada di chat.`;
+}
+
 async function processQuestion(from, name, text, dbSession, lang) {
   const intent = Router.detectIntent(text);
   const topic = intent.label;
 
-  const kbMatch = kb.search(text);
-  const kbHit = kbMatch.find(m => m.data.jawaban && m.score >= 2);
-  if (kbHit) {
-    const answer = toWhatsApp(kbHit.data.jawaban);
-    Analytics.trackMessage(from, name, { text, type: "text", source: "kb", topic, responseTime: 0 });
-    return { text: answer, source: "kb", topic };
+  if (intent.id === "kontak" || isContactOrLocationQuery(text)) {
+    const reply = buildContactReply(lang, isLocationQuery(text));
+    Analytics.trackMessage(from, name, { text, type: "text", source: "kb", topic: reply.topic, responseTime: 0 });
+    return reply;
   }
 
   try {
-    const recentMessages = await db.getConversationContext(from, 6);
+    const recentMessages = await db.getConversationContext(from, 12);
     const historyStr = recentMessages.length > 0
       ? "\n\nRiwayat percakapan:\n" + recentMessages.map(m =>
           `${m.role === "user" ? "User" : "AI"}: ${m.content.substring(0, 500)}`
         ).join("\n")
       : "";
+    const numberContext = buildNumberContext(recentMessages);
 
     const ai = getAI(from);
     const smartCtx = kb.smartContext(text);
@@ -323,36 +464,47 @@ async function processQuestion(from, name, text, dbSession, lang) {
       : lang === "sas"
       ? "\n\nPENTING: Jawab dalam bahasa Sasak (bahasa asli Lombok). Gunakan bahasa Sasak untuk semua jawaban."
       : "\n\nPENTING: Jawab dalam Bahasa Indonesia yang baik dan benar.";
-    const generalInstruction = "\n\nJika pertanyaan tidak terkait SMKN 2 Mataram, jawab sebagai asisten umum secara membantu, aman, dan ringkas. Jangan memaksa jawaban dari data sekolah jika tidak relevan.";
-    ai.setContext(smartCtx + historyStr + langInstruction + generalInstruction);
+    const assistantInstruction = "\n\nIdentitas Anda: Asisten AI SMKN 2 Mataram. Tugas Anda hanya membantu informasi terkait SMKN 2 Mataram: jurusan, SPMB, fasilitas, jadwal, lokasi, kontak, profil sekolah, dan percakapan pendukung yang masih relevan. Jangan mengaku sebagai manusia atau panitia resmi; Anda asisten informasi.";
+    const styleInstruction = "\n\nGaya jawaban WhatsApp: jawab natural, singkat, dan langsung berguna. Target 3-7 kalimat atau maksimal 5 bullet. Hindari artikel panjang, tabel, garis pemisah, heading markdown, dan format ***teks***. Jika memakai penekanan, gunakan format WhatsApp sederhana seperti *Catatan:* atau *Saran:* saja. Untuk pertanyaan peluang seleksi, jangan menjamin diterima; beri estimasi wajar, faktor penentu, dan langkah berikutnya. Untuk pertanyaan hitungan, total, rata-rata, atau nilai, hitung dari angka yang diberikan user atau riwayat chat. Tampilkan perhitungan singkat jika memungkinkan.";
+    const memoryInstruction = "\n\nMemori percakapan: gunakan riwayat chat terbaru untuk mengingat nama, preferensi bahasa, angka/nilai, jurusan yang diminati, dan konteks lanjutan. Jika user baru saja menyebut nama atau data dirinya di riwayat, pakai data itu. Jangan bilang tidak tahu hanya karena tidak ada di database sekolah.";
+    const generalInstruction = "\n\nBatasan: jika pertanyaan benar-benar di luar konteks SMKN 2 Mataram atau percakapan pendukungnya, tolak dengan sopan dan arahkan kembali ke info SMKN 2 Mataram. Jangan memberi bantuan umum seperti coding, tugas non-sekolah, hiburan, atau topik bebas. Jangan berhenti di kalimat tidak lengkap.";
+    const baseContext = smartCtx + historyStr + numberContext + langInstruction + assistantInstruction + styleInstruction + memoryInstruction + generalInstruction + getCurrentWitaContext();
+    ai.setContext(baseContext);
     ai.reset();
 
     const aiStart = Date.now();
-    const response = await ai.ask(text);
+    let response = await ai.ask(text);
+    if (isIncompleteAiReply(response?.text)) {
+      ai.reset();
+      ai.setContext(historyStr + numberContext + langInstruction + assistantInstruction + styleInstruction + memoryInstruction + generalInstruction + getCurrentWitaContext());
+      response = await ai.ask(text);
+    }
 
-    if (response?.text) {
+    if (response?.text && !isIncompleteAiReply(response.text)) {
       const timeMs = Date.now() - aiStart;
       console.log(`[AI DONE] ${from}: ${response.text.length} chars in ${timeMs}ms`);
 
       Analytics.trackMessage(from, name, { text, type: "text", source: "ai", topic, responseTime: timeMs });
 
-      // Feedback setelah jawaban selesai
-      const fbLang = lang || "id";
-      const fb = getFeedbackButtons(fbLang);
-      const mid = lastMessageId[from] || 0;
-      setTimeout(async () => {
-        try {
-          await sleep(1500);
-          await whatsapp.sendButtonMessage(from, fb.text, fb.buttons.map(b => ({
-            ...b,
-            id: b.id + (mid ? `_${mid}` : "")
-          })));
-        } catch (e) {}
-      }, 1000);
+      const reply = { text: toWhatsApp(response.text), source: "ai", topic };
+      if (shouldAskFeedback(from, reply)) {
+        const fbLang = lang || "id";
+        const fb = getFeedbackButtons(fbLang);
+        const mid = lastMessageId[from] || 0;
+        setTimeout(async () => {
+          try {
+            await sleep(1500);
+            await whatsapp.sendButtonMessage(from, fb.text, fb.buttons.map(b => ({
+              ...b,
+              id: b.id + (mid ? `_${mid}` : "")
+            })));
+          } catch (e) {}
+        }, 1000);
+      }
 
-      return { text: toWhatsApp(response.text), source: "ai", topic };
+      return reply;
     }
-    throw new Error("empty");
+    throw new Error(response?.text ? "incomplete" : "empty");
   } catch (err) {
     console.error(`[AI FAIL] ${from}: ${err.message}`);
     Analytics.trackError(from, err.message);
@@ -365,17 +517,11 @@ async function processQuestion(from, name, text, dbSession, lang) {
       };
     }
 
-    const fb = kb.search(text);
-    const fbHit = fb.find(f => f.data.jawaban);
-    if (fbHit) {
-      return { text: toWhatsApp(fbHit.data.jawaban), source: "kb", topic };
-    }
-
     await db.addUnanswered(from, text, `AI+KB fail: ${err.message.substring(0, 100)}`);
     Analytics.trackMessage(from, name, { text, type: "text", source: "unanswered", topic, responseTime: 0 });
 
     return {
-      text: `${getString(lang, "sorry_unanswered", { name: name || "Kak" })}\n\n📞 ${kb.data.kontak.telepon}\n📧 ${kb.data.kontak.email}`,
+      text: "Maaf, jawaban AI barusan gagal dibuat lengkap. Coba kirim ulang pertanyaannya dengan kalimat yang sama atau sedikit lebih jelas.",
       source: "unanswered",
       topic
     };
@@ -419,6 +565,51 @@ async function sendReply(from, reply, lang, name) {
     return;
   }
 
+  if (reply.type === "location_and_cta") {
+    // Send: text info + location + optional CTA button
+    const parts = Splitter.split(reply.text);
+    for (const part of parts) {
+      await whatsapp.sendMessage(from, part);
+    }
+    if (reply.location) {
+      await sleep(500);
+      await whatsapp.sendLocation(from, reply.location.lat, reply.location.lng, reply.location.name, reply.location.address);
+    }
+    if (reply.cta) {
+      await sleep(800);
+      await whatsapp.sendCTAButton(from, reply.cta.text || reply.cta.label || "Open link", reply.cta.url, reply.cta.label || "Open");
+    }
+    return;
+  }
+
+  if (reply.type === "contact_and_cta") {
+    const parts = Splitter.split(reply.text);
+    for (const part of parts) {
+      await whatsapp.sendMessage(from, part);
+    }
+    if (reply.contact) {
+      await sleep(500);
+      await whatsapp.sendContact(from, reply.contact);
+    }
+    if (reply.cta) {
+      await sleep(800);
+      await whatsapp.sendCTAButton(from, reply.cta.text || reply.cta.label || "Open link", reply.cta.url, reply.cta.label || "Open");
+    }
+    return;
+  }
+
+  if (reply.type === "text_and_cta") {
+    const parts = Splitter.split(reply.text);
+    for (const part of parts) {
+      await whatsapp.sendMessage(from, part);
+    }
+    if (reply.cta) {
+      await sleep(800);
+      await whatsapp.sendCTAButton(from, reply.cta.text || reply.cta.label || "Open link", reply.cta.url, reply.cta.label || "Open");
+    }
+    return;
+  }
+
   if (typeof reply.text === "string") {
     const parts = Splitter.split(reply.text);
     for (const part of parts) {
@@ -437,23 +628,6 @@ async function sendReply(from, reply, lang, name) {
 
   if (reply.type === "buttons" || reply.buttons) {
     await whatsapp.sendButtonMessage(from, reply.text, reply.buttons);
-    return;
-  }
-
-  if (reply.type === "location_and_cta") {
-    // Send: text info + location + optional CTA button
-    const parts = Splitter.split(reply.text);
-    for (const part of parts) {
-      await whatsapp.sendMessage(from, part);
-    }
-    if (reply.location) {
-      await sleep(500);
-      await whatsapp.sendLocation(from, reply.location.lat, reply.location.lng, reply.location.name, reply.location.address);
-    }
-    if (reply.cta) {
-      await sleep(800);
-      await whatsapp.sendCTAButton(from, reply.cta.label || "Visit our website", reply.cta.url, reply.cta.label || "Open");
-    }
     return;
   }
 
@@ -623,7 +797,7 @@ app.get("/log/:n", authMiddleware, (req, res) => {
 });
 
 app.post("/simulate", authMiddleware, async (req, res) => {
-  const { userId, name, text, buttonId, lang: simLang } = req.body;
+  const { userId, name, text, buttonId, lang: simLang, dryRun } = req.body;
   if (!userId || (!text && !buttonId)) {
     return res.status(400).json({ error: "userId and text or buttonId required" });
   }
@@ -634,7 +808,9 @@ app.post("/simulate", authMiddleware, async (req, res) => {
     if (simLang) await db.updateSession(userId, { language: simLang });
     const lang = simLang || (await db.getOrCreateSession(userId)).language || "id";
     const reply = await handleIncoming(userId, name || "Sim", text || "", !!buttonId, buttonId);
-    await sendReply(userId, reply, lang, name || "Sim");
+    if (!dryRun) {
+      await sendReply(userId, reply, lang, name || "Sim");
+    }
     res.json({ status: "ok", userId, elapsed_ms: Date.now() - start, reply });
   } catch (err) {
     res.status(500).json({ error: err.message });
