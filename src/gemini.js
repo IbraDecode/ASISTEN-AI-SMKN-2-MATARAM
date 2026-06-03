@@ -57,8 +57,8 @@ class GeminiClient {
     this.responseId = null;
     this.lastMeta = null;
 
-    this.timeout = opts.timeout || 20000;
-    this.maxRetries = opts.maxRetries || 2;
+    this.timeout = opts.timeout || 8000;
+    this.maxRetries = opts.maxRetries || 1;
     this.userAgent = opts.userAgent || USER_AGENTS[uaIndex++ % USER_AGENTS.length];
 
     // Model selection
@@ -120,7 +120,7 @@ class GeminiClient {
       try {
         const res = await nodeFetch(url, {
           headers: { "user-agent": this.userAgent },
-          signal: AbortSignal.timeout(15000),
+          signal: AbortSignal.timeout(7000),
           redirect: "follow"
         });
         const html = await res.text();

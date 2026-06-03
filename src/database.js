@@ -3,7 +3,8 @@ const { Pool } = require("pg");
 const { PrismaClient } = require("./generated/prisma/client.js");
 const { PrismaPg } = require("@prisma/adapter-pg");
 
-const DB_TIMEOUT = 5000;
+const DB_TIMEOUT = 8000;
+const DB_QUERY_TIMEOUT = 10000;
 
 class AppDatabase {
   async init() {
@@ -12,14 +13,15 @@ class AppDatabase {
     }
     const pool = new Pool({
       connectionString: process.env.DATABASE_URL,
-      connectionTimeoutMillis: DB_TIMEOUT
+      connectionTimeoutMillis: DB_TIMEOUT,
+      ssl: { rejectUnauthorized: false }
     });
     this.prisma = new PrismaClient({
       adapter: new PrismaPg(pool)
     });
     await withTimeout(this.prisma.$connect(), DB_TIMEOUT, "Database connection timeout");
-    // Verify credentials with a lightweight query
-    await withTimeout(this.prisma.$queryRaw`SELECT 1`, DB_TIMEOUT, "Database auth query timeout");
+    // Test query to verify credentials and connection
+    await withTimeout(this.prisma.$queryRaw`SELECT 1 AS ok`, DB_QUERY_TIMEOUT, "Database query timeout");
     return this;
   }
 
