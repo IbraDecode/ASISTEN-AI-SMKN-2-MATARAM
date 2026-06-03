@@ -1,6 +1,6 @@
 /**
- * Streaming Response — kirim semua chunk tanpa delay
- * WA tidak butuh efek typing, jadi kirim langsung semua bagian.
+ * Streaming — kirim chunk bertahap dengan jeda natural
+ * biar dari sisi WhatsApp keliatan kayak ngetik beneran.
  */
 
 class Streamer {
@@ -34,11 +34,17 @@ class Streamer {
       const chunk = chunks[i];
       if (!chunk.trim()) continue;
 
-      const prefix = chunks.length > 1 ? `(${i + 1}/${chunks.length}) ` : "";
       try {
-        await this.wa.sendMessage(userId, prefix + chunk);
+        await this.wa.sendMessage(userId, chunk);
       } catch (err) {
         console.error(`[STREAM ERR] ${userId}: ${err.message}`);
+      }
+
+      // Jeda natural antar-chunk: makin panjang teks makin lama jeda
+      if (i < chunks.length - 1) {
+        const words = chunk.split(/\s+/).length;
+        const delay = Math.min(Math.max(words * 100, 400), 2000);
+        await new Promise((r) => setTimeout(r, delay));
       }
     }
 
