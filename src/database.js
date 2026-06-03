@@ -126,6 +126,13 @@ class AppDatabase {
     `).all(limit);
   }
 
+  getConversationContext(userId, limit = 6) {
+    return this.db.prepare(`
+      SELECT role, content FROM messages
+      WHERE user_id = ? ORDER BY created_at ASC LIMIT ?
+    `).all(userId, limit);
+  }
+
   // ─── Feedback ───
 
   saveFeedback(userId, messageId, rating) {

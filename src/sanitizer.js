@@ -21,6 +21,11 @@ function sanitize(text) {
   return clean;
 }
 
+function validateButtonId(id) {
+  if (typeof id !== "string") return false;
+  return /^[a-z0-9_-]{1,50}$/i.test(id);
+}
+
 // ─── Rate Limiter ───
 
 class RateLimiter {
@@ -152,6 +157,7 @@ class UnansweredTracker {
 
 module.exports = {
   sanitize,
+  validateButtonId,
   RateLimiter,
   authMiddleware,
   handleNonTextMessage,

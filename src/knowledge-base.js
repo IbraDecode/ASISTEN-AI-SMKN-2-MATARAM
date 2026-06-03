@@ -109,10 +109,6 @@ Tahapan: ${d.spmb.tahapan.map((t, i) => `${i + 1}. ${t}`).join(" | ")}`
     return parts.join("\n\n");
   }
 
-  smartContext(query) {
-    return this.getContext(query);
-  }
-
   search(query) {
     const q = query.toLowerCase();
     const results = [];
