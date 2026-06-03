@@ -35,8 +35,11 @@ class Streamer {
 
     const streamPromise = this._doStream(userId, chunks, { minDelay, maxDelay, charsPerSecond, feedbackCallback });
     this.activeStreams.set(userId, streamPromise);
-    await streamPromise;
-    this.activeStreams.delete(userId);
+    try {
+      await streamPromise;
+    } finally {
+      this.activeStreams.delete(userId);
+    }
   }
 
   async _doStream(userId, chunks, { minDelay, maxDelay, charsPerSecond, feedbackCallback }) {

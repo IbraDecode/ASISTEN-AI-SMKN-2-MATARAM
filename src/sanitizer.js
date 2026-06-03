@@ -106,60 +106,10 @@ function handleNonTextMessage(msg) {
   return `Maaf, saya hanya bisa membaca pesan teks. Saya tidak bisa memproses ${label} yang Anda kirim.\n\nSilakan ketik pertanyaan Anda dalam bentuk teks, atau gunakan menu di bawah ini:`;
 }
 
-// ─── Unanswered Tracker ───
-
-class UnansweredTracker {
-  constructor() {
-    this.questions = [];
-  }
-
-  add(userId, question, reason) {
-    this.questions.push({
-      userId,
-      question,
-      reason,
-      timestamp: Date.now(),
-      answered: false
-    });
-
-    // Keep only last 500
-    if (this.questions.length > 500) {
-      this.questions.splice(0, this.questions.length - 500);
-    }
-  }
-
-  getAll() {
-    return this.questions.filter(q => !q.answered).slice(-100).reverse();
-  }
-
-  markAnswered(question) {
-    const found = this.questions.find(
-      q => q.question === question && !q.answered
-    );
-    if (found) found.answered = true;
-  }
-
-  getStats() {
-    const total = this.questions.length;
-    const unanswered = this.questions.filter(q => !q.answered).length;
-    const topQuestions = {};
-    for (const q of this.questions) {
-      topQuestions[q.question] = (topQuestions[q.question] || 0) + 1;
-    }
-    const top = Object.entries(topQuestions)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 20)
-      .map(([q, c]) => ({ question: q.substring(0, 100), count: c }));
-
-    return { total, unanswered, topUnanswered: top };
-  }
-}
-
 module.exports = {
   sanitize,
   validateButtonId,
   RateLimiter,
   authMiddleware,
-  handleNonTextMessage,
-  UnansweredTracker
+  handleNonTextMessage
 };

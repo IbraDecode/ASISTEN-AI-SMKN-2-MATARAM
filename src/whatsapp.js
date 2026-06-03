@@ -15,6 +15,25 @@ class WhatsAppClient {
     this.conversationCount = 0;
   }
 
+  async _fetch(url, opts, retries = 2) {
+    for (let i = 0; i <= retries; i++) {
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 10000);
+        const res = await nodeFetch(url, { ...opts, signal: controller.signal });
+        clearTimeout(timeout);
+        if (res.status === 429 && i < retries) {
+          await new Promise((r) => setTimeout(r, 2000 * (i + 1)));
+          continue;
+        }
+        return res;
+      } catch (err) {
+        if (i >= retries) throw err;
+        await new Promise((r) => setTimeout(r, 1000 * (i + 1)));
+      }
+    }
+  }
+
   async sendMessage(to, text) {
     await this._rateLimit();
 
@@ -26,23 +45,22 @@ class WhatsAppClient {
       text: { preview_url: false, body: String(text).substring(0, MAX_TEXT_LENGTH) }
     };
 
-    const res = await nodeFetch(this.baseUrl, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${this.accessToken}`,
-        "Content-Type": "application/json"
-      }
-    });
-
-    const result = await res.json();
-    if (!result.error) this.conversationCount++;
-
-    if (result.error?.code === 429) {
-      await new Promise((r) => setTimeout(r, 2000));
-      return this.sendMessage(to, text);
+    try {
+      const res = await this._fetch(this.baseUrl, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${this.accessToken}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+      });
+      const result = await res.json();
+      if (!result.error) this.conversationCount++;
+      return result;
+    } catch (err) {
+      console.error(`[WA SEND FAIL] ${to}: ${err.message}`);
+      return { error: { message: err.message } };
     }
-
-    return result;
   }
 
   async sendButtonMessage(to, text, buttons) {
@@ -70,19 +88,22 @@ class WhatsAppClient {
       }
     };
 
-    const res = await nodeFetch(this.baseUrl, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${this.accessToken}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(body)
-    });
-
-    const result = await res.json();
-    if (!result.error) this.conversationCount++;
-
-    return result;
+    try {
+      const res = await this._fetch(this.baseUrl, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${this.accessToken}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+      });
+      const result = await res.json();
+      if (!result.error) this.conversationCount++;
+      return result;
+    } catch (err) {
+      console.error(`[WA BUTTON FAIL] ${to}: ${err.message}`);
+      return { error: { message: err.message } };
+    }
   }
 
   async _rateLimit() {

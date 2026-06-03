@@ -34,6 +34,7 @@ class Analytics {
     };
 
     this.log.push(entry);
+    if (this.log.length > 1000) this.log.shift();
     this.dailyStats.total++;
     this.dailyStats.topTopics[entry.topic] =
       (this.dailyStats.topTopics[entry.topic] || 0) + 1;
