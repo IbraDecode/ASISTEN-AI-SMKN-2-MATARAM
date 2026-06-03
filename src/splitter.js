@@ -1,5 +1,5 @@
 /**
- * Message Splitter — potong pesan panjang untuk WhatsApp
+ * Message Splitter - potong pesan panjang untuk WhatsApp
  * Batas WhatsApp: 4096 chars per pesan
  */
 

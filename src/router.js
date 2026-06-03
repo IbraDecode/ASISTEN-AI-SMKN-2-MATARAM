@@ -1,5 +1,5 @@
 /**
- * Intent Router — deteksi topik pertanyaan otomatis
+ * Intent Router - deteksi topik pertanyaan otomatis
  * Hybrid: keyword-based routing + AI fallback
  */
 

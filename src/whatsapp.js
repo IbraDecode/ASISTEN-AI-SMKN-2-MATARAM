@@ -20,7 +20,7 @@ class WhatsAppClient {
     this.conversationCount = 0;
   }
 
-  // Rate limit mutex — antre semua send biar gak tabrakan
+  // Rate limit mutex - antre semua send biar gak tabrakan
   _enqueue(fn) {
     this.sendQueue = this.sendQueue.then(fn, fn);
     return this.sendQueue;
@@ -191,6 +191,27 @@ class WhatsAppClient {
       });
     } catch (err) {
       console.error(`[WA MARKREAD FAIL] ${to}: ${err.message}`);
+    }
+  }
+
+  async sendTyping(to, messageId) {
+    if (!messageId) return;
+    try {
+      await this._fetch(this.baseUrl, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${this.accessToken}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          messaging_product: "whatsapp",
+          status: "read",
+          message_id: messageId,
+          typing_indicator: { type: "text" }
+        })
+      });
+    } catch (err) {
+      console.error(`[WA TYPING FAIL] ${to}: ${err.message}`);
     }
   }
 

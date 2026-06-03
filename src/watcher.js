@@ -1,5 +1,5 @@
 /**
- * File Watcher — auto-reload KB saat file berubah
+ * File Watcher - auto-reload KB saat file berubah
  */
 
 const fs = require("fs");

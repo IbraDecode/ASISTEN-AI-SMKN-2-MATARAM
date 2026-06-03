@@ -221,7 +221,7 @@ async function handleButton(from, name, buttonId, dbSession, lang) {
       const bs = d.bantuan_siswa;
       return {
         type: "text",
-        text: `🎓 *${lang === "en" ? "Student Financial Aid" : "Bantuan Siswa"}*\n\n${bs ? bs.map(p => `*${p.program}*\n${p.sumber} — ${p.besaran}\n📋 ${p.syarat}`).join("\n\n") : "Info belum tersedia."}`
+        text: `🎓 *${lang === "en" ? "Student Financial Aid" : "Bantuan Siswa"}*\n\n${bs ? bs.map(p => `*${p.program}*\n${p.sumber} - ${p.besaran}\n📋 ${p.syarat}`).join("\n\n") : "Info belum tersedia."}`
       };
     },
     menu_guru: () => {
@@ -266,7 +266,7 @@ async function handleButton(from, name, buttonId, dbSession, lang) {
       const m = d.mpls;
       return {
         type: "text",
-        text: `📢 *${lang === "en" ? "MPLS (Orientation)" : "MPLS — Masa Pengenalan Lingkungan Sekolah"}*\n\n${m.deskripsi}\n\n📋 Kegiatan: ${m.kegiatan.map(k => `• ${k}`).join("\n")}\n\n🚫 Larangan: ${m.larangan.map(l => `• ${l}`).join("\n")}`
+        text: `📢 *${lang === "en" ? "MPLS (Orientation)" : "MPLS - Masa Pengenalan Lingkungan Sekolah"}*\n\n${m.deskripsi}\n\n📋 Kegiatan: ${m.kegiatan.map(k => `• ${k}`).join("\n")}\n\n🚫 Larangan: ${m.larangan.map(l => `• ${l}`).join("\n")}`
       };
     },
     menu_alumni: () => {
@@ -301,7 +301,7 @@ async function processQuestion(from, name, text, dbSession, lang) {
   const topic = intent.label;
 
   const kbMatch = kb.search(text);
-  const kbHit = kbMatch.find(m => m.data.jawaban);
+  const kbHit = kbMatch.find(m => m.data.jawaban && m.score >= 2);
   if (kbHit) {
     const answer = toWhatsApp(kbHit.data.jawaban);
     Analytics.trackMessage(from, name, { text, type: "text", source: "kb", topic, responseTime: 0 });
@@ -323,31 +323,20 @@ async function processQuestion(from, name, text, dbSession, lang) {
       : lang === "sas"
       ? "\n\nPENTING: Jawab dalam bahasa Sasak (bahasa asli Lombok). Gunakan bahasa Sasak untuk semua jawaban."
       : "\n\nPENTING: Jawab dalam Bahasa Indonesia yang baik dan benar.";
-    ai.setContext(smartCtx + historyStr + langInstruction);
+    const generalInstruction = "\n\nJika pertanyaan tidak terkait SMKN 2 Mataram, jawab sebagai asisten umum secara membantu, aman, dan ringkas. Jangan memaksa jawaban dari data sekolah jika tidak relevan.";
+    ai.setContext(smartCtx + historyStr + langInstruction + generalInstruction);
     ai.reset();
 
-    // Pakai streaming biar first word < 2 detik
-    const streamStart = Date.now();
-    let fullText = "";
-
-    const response = await ai.askStream(text, (delta, currentText) => {
-      fullText = currentText;
-      const formatted = toWhatsApp(delta);
-      if (!formatted.trim()) return;
-
-      // Kirim setiap chunk — kalau gagal, log tapi lanjut
-      whatsapp.sendMessage(from, formatted).catch(err => {
-        console.error(`[STREAM SEND ERR] ${from}: ${err.message}`);
-      });
-    });
+    const aiStart = Date.now();
+    const response = await ai.ask(text);
 
     if (response?.text) {
-      const timeMs = Date.now() - streamStart;
-      console.log(`[STREAM DONE] ${from}: ${response.text.length} chars in ${timeMs}ms`);
+      const timeMs = Date.now() - aiStart;
+      console.log(`[AI DONE] ${from}: ${response.text.length} chars in ${timeMs}ms`);
 
       Analytics.trackMessage(from, name, { text, type: "text", source: "ai", topic, responseTime: timeMs });
 
-      // Feedback setelah stream selesai
+      // Feedback setelah jawaban selesai
       const fbLang = lang || "id";
       const fb = getFeedbackButtons(fbLang);
       const mid = lastMessageId[from] || 0;
@@ -361,7 +350,7 @@ async function processQuestion(from, name, text, dbSession, lang) {
         } catch (e) {}
       }, 1000);
 
-      return { text: response.text, source: "ai", topic, streamed: true };
+      return { text: toWhatsApp(response.text), source: "ai", topic };
     }
     throw new Error("empty");
   } catch (err) {
@@ -400,7 +389,7 @@ async function sendReply(from, reply, lang, name) {
     await sleep(1000);
     const menu = getWelcomeList(name || from, lang || "id");
     if (menu.sections) {
-      await whatsapp.sendListMessage(from, menu.text, menu.button, menu.sections, { header: menu.header, footer: menu.footer || "SMKN 2 Mataram — Ketik 'menu' kapan saja" });
+      await whatsapp.sendListMessage(from, menu.text, menu.button, menu.sections, { header: menu.header, footer: menu.footer || "SMKN 2 Mataram - Ketik 'menu' kapan saja" });
     } else if (menu.buttons) {
       await whatsapp.sendButtonMessage(from, menu.text, menu.buttons);
     }
@@ -408,7 +397,7 @@ async function sendReply(from, reply, lang, name) {
   }
 
   if (reply.isStream && Array.isArray(reply.text)) {
-    // Legacy streaming — send chunks with natural delays
+    // Legacy streaming - send chunks with natural delays
     await streamer.stream(from, reply.text, {
       feedbackCallback: async (uid) => {
         const session = await db.getOrCreateSession(uid);
@@ -426,7 +415,7 @@ async function sendReply(from, reply, lang, name) {
   }
 
   if (reply.streamed) {
-    // True SSE streaming — already sent incrementally, no further action needed
+    // True SSE streaming - already sent incrementally, no further action needed
     return;
   }
 
@@ -507,7 +496,7 @@ async function processWebhook(body) {
 
   try {
     if (parsed.msgId) {
-      whatsapp.markAsRead(from, parsed.msgId).catch(err => console.error(`[READ ERR] ${from}: ${err.message}`));
+      whatsapp.sendTyping(from, parsed.msgId).catch(err => console.error(`[TYPING ERR] ${from}: ${err.message}`));
     }
 
     const rateCheck = rateLimiter.check(from);
@@ -674,7 +663,7 @@ app.post("/broadcast", authMiddleware, async (req, res) => {
   let sent = 0;
   let failed = 0;
 
-  // Kirim parallel — 10 batch
+  // Kirim parallel - 10 batch
   const CONCURRENCY = 10;
   for (let i = 0; i < userIds.length; i += CONCURRENCY) {
     const batch = userIds.slice(i, i + CONCURRENCY);

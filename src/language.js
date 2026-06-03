@@ -181,7 +181,7 @@ function getJurusanList(jurusan, lang) {
     header: lang === "en" ? "📚 Choose a Major" : "📚 Pilih Jurusan",
     text: lang === "en" ? "Select a major for details:" : "Pilih jurusan untuk info lengkap:",
     button: lang === "en" ? "Majors" : "Jurusan",
-    footer: `SMKN 2 Mataram — ${jurusan.length} program keahlian`,
+    footer: `SMKN 2 Mataram - ${jurusan.length} program keahlian`,
     sections: [
       {
         title: lang === "en" ? "Majors" : "Daftar Jurusan",

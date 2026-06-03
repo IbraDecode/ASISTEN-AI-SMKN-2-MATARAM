@@ -26,11 +26,11 @@ WhatsApp → POST /webhook
 ## Database Schema (PostgreSQL via Prisma)
 
 ```
-chat_sessions    — userId, state, language, messageCount, history, timestamps
-messages         — id, userId, role, content, source, topic, language, createdAt
-feedback         — id, userId, messageId, rating (up/down)
-events           — id, title, description, eventDate, category
-unanswered       — id, userId, question, reason, answered (boolean)
+chat_sessions    - userId, state, language, messageCount, history, timestamps
+messages         - id, userId, role, content, source, topic, language, createdAt
+feedback         - id, userId, messageId, rating (up/down)
+events           - id, title, description, eventDate, category
+unanswered       - id, userId, question, reason, answered (boolean)
 ```
 
 ## Gemini Scraper
@@ -62,20 +62,20 @@ Thin wrapper around Meta's REST API:
 `data/kb.json` contains structured school data:
 
 ```
-metadata       — school name, NPSN, accreditation, contact
-jurusan[10]    — RPL, TKJ, AKL, MPK, BDG, UPW, BRT, LPS, DKV, Animasi
-fasilitas[]    — labs, library, field, mosque, canteen, WiFi
-ekstrakurikuler — paskibra, pramuka, PMR, sports, arts
-prestasi[]     — competition achievements
-spmb           — admission jalur, requirements, stages
-kontak         — address, phone, email, website, social media
-visi_misi      — vision, mission, goals
-seragam        — daily uniform by day
-jam_sekolah    — school hours
-mpls           — orientation program
-bantuan_siswa  — PIP/KIP financial aid programs
-struktur_organisasi — staff directory
-faq[63]        — question-answer pairs
+metadata       - school name, NPSN, accreditation, contact
+jurusan[10]    - RPL, TKJ, AKL, MPK, BDG, UPW, BRT, LPS, DKV, Animasi
+fasilitas[]    - labs, library, field, mosque, canteen, WiFi
+ekstrakurikuler - paskibra, pramuka, PMR, sports, arts
+prestasi[]     - competition achievements
+spmb           - admission jalur, requirements, stages
+kontak         - address, phone, email, website, social media
+visi_misi      - vision, mission, goals
+seragam        - daily uniform by day
+jam_sekolah    - school hours
+mpls           - orientation program
+bantuan_siswa  - PIP/KIP financial aid programs
+struktur_organisasi - staff directory
+faq[63]        - question-answer pairs
 ```
 
 `kb.search()` tokenizes query, scores against jurusan + FAQ by keyword overlap, returns top 5 matches. `smartContext()` selects relevant sections by keyword matching for Gemini context injection.

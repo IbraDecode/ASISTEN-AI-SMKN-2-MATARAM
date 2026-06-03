@@ -87,7 +87,7 @@ Meta sends webhooks to `POST /webhook`. Verification at `GET /webhook?hub.mode=s
 
 The scraper reverse-engineers `gemini.google.com/_/BardChatUi/data/assistant.lamda.BardFrontendService/StreamGenerate`:
 
-- No API key required — anonymous tokens extracted from page HTML
+- No API key required - anonymous tokens extracted from page HTML
 - Tokens: `cfb2h` (build label), `FdrFJe` (session ID), `SNlM0e` (access token, optional since Apr 2026)
 - Model selection via `x-goog-ext-525001261-jspb` header + payload field `[79]`
 - Available models: `FLASH`, `PRO`, `THINKING`, `PRO_EXP`, `FLASH_EXP`, `DEEP_SEARCH`, `GEMINI_3_PRO`, `GEMINI_20`

@@ -2,7 +2,7 @@ const nodeFetch = require("node-fetch");
 const crypto = require("crypto");
 
 // ─── Model IDs (dari reverse engineering gemini.google.com) ───
-// Sumber: g4f (xtekky/gpt4free) + HanaokaYuzu/Gemini-API — June 2026
+// Sumber: g4f (xtekky/gpt4free) + HanaokaYuzu/Gemini-API - June 2026
 const MODELS = {
   FLASH:        "9ec249fc9ad08861",  // gemini-2.5-flash
   PRO:          "61530e79959ab139",  // gemini-2.5-pro
@@ -135,7 +135,7 @@ class GeminiClient {
           || this._extract(html, '"FdrFJe":"', '"')
           || this._extract(html, "FdrFJe", '"');
 
-        // SNlM0e dihapus Google sejak April 2026 — optional
+        // SNlM0e dihapus Google sejak April 2026 - optional
         const at = this._regexExtract(html, /"SNlM0e"[^:]*:\s*"([^"]+)"/)
           || this._extract(html, '"SNlM0e":"', '"')
           || "";
@@ -222,7 +222,7 @@ class GeminiClient {
     inner[7] = 1;
     inner[10] = 1;
     inner[11] = 0;
-    inner[17] = [[0]];  // [think_mode] — 0 = off
+    inner[17] = [[0]];  // [think_mode] - 0 = off
     inner[18] = 0;
     inner[27] = 1;
     inner[30] = [4];
@@ -238,7 +238,7 @@ class GeminiClient {
 
   async ask(msg) {
     if (this._isCircuitOpen()) {
-      throw new Error("Gemini circuit breaker open — too many failures");
+      throw new Error("Gemini circuit breaker open - too many failures");
     }
 
     let lastError;
@@ -274,7 +274,7 @@ class GeminiClient {
           }
         }
         if (errStr.includes("safety")) {
-          // Safety block — tidak usah retry
+          // Safety block - tidak usah retry
           break;
         }
         if (attempt < this.maxRetries) {
@@ -403,7 +403,7 @@ class GeminiClient {
       if (res.status === 429) throw new Error("429_RATE_LIMITED");
       if (res.status !== 200) throw new Error(`HTTP_${res.status}`);
 
-      // Stream parsing — process chunks as they arrive
+      // Stream parsing - process chunks as they arrive
       return await this._parseStream(res.body, onChunk);
     } finally {
       clearTimeout(timeoutId);

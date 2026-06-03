@@ -1,5 +1,5 @@
 /**
- * Ingest Tool — Training Knowledge Base SMKN 2 Mataram
+ * Ingest Tool - Training Knowledge Base SMKN 2 Mataram
  *
  * Cara pakai:
  *   1. Tambah data baru di data/kb.json
@@ -49,7 +49,7 @@ function validate() {
 function report() {
   const { data, errors, warnings } = validate();
 
-  console.log(`\n  TRAINING REPORT — SMKN 2 Mataram KB`);
+  console.log(`\n  TRAINING REPORT - SMKN 2 Mataram KB`);
   console.log(`  ───────────────────────────────────`);
   console.log(`  Status   : ${errors.length === 0 ? "✅ VALID" : "❌ INVALID"}`);
   console.log(`  Errors   : ${errors.length}`);

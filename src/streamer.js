@@ -1,5 +1,5 @@
 /**
- * Streaming — kirim chunk bertahap dengan jeda natural
+ * Streaming - kirim chunk bertahap dengan jeda natural
  * 
  * - Jeda bervariasi + random jitter biar keliatan natural
  * - Stream berjalan bisa dibatalkan (user kirim pesan baru)
