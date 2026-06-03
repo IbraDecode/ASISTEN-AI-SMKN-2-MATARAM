@@ -1,0 +1,314 @@
+{
+  "metadata": {
+    "school_name": "SMK Negeri 2 Mataram",
+    "npsn": "50204506",
+    "established": "2 Januari 1968",
+    "status": "Negeri",
+    "akreditasi": "A",
+    "akreditasi_no": "053/BAN-SM/SK/2019",
+    "kepala_sekolah": "H. Munawar, S.Sos., S.Kom., M.M.",
+    "komite_sekolah": "Drs. TGH. Muhtar",
+    "alamat": "Jl. Pemuda No. 18, Dasan Agung Baru, Kec. Selaparang, Kota Mataram, NTB",
+    "telepon": "0370 633654",
+    "fax": "0370 629654",
+    "email": "smkn2mtr@gmail.com",
+    "website": "smkn2mataram.sch.id",
+    "total_siswa": 1523,
+    "total_guru": 88,
+    "total_kelas": 48,
+    "sejarah": "Berdiri tahun 1962 sebagai SKOPMA (Sekolah Koperasi Menengah Atas), berubah menjadi SMEA tahun 1968, dan menjadi SMK Negeri 2 Mataram tahun 1998. Awalnya hanya bidang Bisnis Manajemen dan Pariwisata, kini berkembang menjadi 13 kompetensi keahlian di berbagai bidang."
+  },
+  "jurusan": [
+    {
+      "id": "akl",
+      "nama": "Akuntansi dan Keuangan Lembaga",
+      "singkatan": "AKL",
+      "bidang": "Bisnis dan Manajemen",
+      "deskripsi": "Mempelajari akuntansi dasar hingga lanjutan, perbankan dasar, etika profesi, aplikasi pengolah angka (spreadsheet), akuntansi perusahaan jasa, dagang dan manufaktur, akuntansi lembaga/instansi pemerintah, akuntansi keuangan, komputer akuntansi, administrasi pajak, serta produk kreatif dan kewirausahaan.",
+      "mata_pelajaran_utama": ["Akuntansi Dasar", "Akuntansi Keuangan", "Komputer Akuntansi", "Administrasi Pajak", "Aplikasi Pengolah Angka"],
+      "durasi_pendidikan": "3 tahun (6 semester)",
+      "sertifikasi": ["Sertifikasi Akuntansi Muda", "Brevet Pajak"],
+      "prospek_kerja": ["Staf Akuntansi", "Staf Keuangan", "Administrasi Pajak", "Internal Auditor", "Finance Staff", "Tax Consultant"],
+      "mitra_du_di": ["Kantor Akuntan Publik", "Perusahaan Perbankan", "Kantor Pajak", "Perusahaan Manufaktur"]
+    },
+    {
+      "id": "mpk",
+      "nama": "Manajemen Perkantoran",
+      "singkatan": "MPK",
+      "bidang": "Bisnis dan Manajemen",
+      "deskripsi": "Mempelajari teknologi perkantoran, korespondensi Bahasa Indonesia dan Bahasa Inggris, kearsipan digital dan manual, otomatisasi tata kelola keuangan, otomatisasi tata kelola kepegawaian, serta manajemen perkantoran modern berbasis teknologi.",
+      "mata_pelajaran_utama": ["Korespondensi", "Kearsipan", "Teknologi Perkantoran", "Otomatisasi Keuangan", "Otomatisasi Kepegawaian"],
+      "durasi_pendidikan": "3 tahun (6 semester)",
+      "sertifikasi": ["Sertifikasi Administrasi Perkantoran"],
+      "prospek_kerja": ["Administrasi Perkantoran", "Sekretaris", "Office Manager", "Staf HRD", "Customer Service", "Data Entry Specialist"],
+      "mitra_du_di": ["Kantor Pemerintahan", "Perusahaan Swasta", "Perbankan", "Lembaga Pendidikan"]
+    },
+    {
+      "id": "bdg",
+      "nama": "Bisnis Digital",
+      "singkatan": "BDG",
+      "bidang": "Bisnis dan Manajemen",
+      "deskripsi": "Mempelajari pemasaran digital, e-commerce, content creation, social media marketing, SEO (Search Engine Optimization), SEM (Search Engine Marketing), strategi bisnis online, copywriting, dan analisis data pasar digital.",
+      "mata_pelajaran_utama": ["Pemasaran Digital", "E-commerce", "Content Creation", "Social Media Marketing", "SEO/SEM"],
+      "durasi_pendidikan": "3 tahun (6 semester)",
+      "sertifikasi": ["Sertifikasi Digital Marketing", "Google Certified"],
+      "prospek_kerja": ["Digital Marketer", "Social Media Specialist", "Content Creator", "E-commerce Manager", "SEO Specialist", "Copywriter"],
+      "mitra_du_di": ["Startup Digital", "Agency Marketing", "Marketplace Online", "Perusahaan Retail Modern"]
+    },
+    {
+      "id": "upw",
+      "nama": "Usaha Perjalanan Wisata",
+      "singkatan": "UPW",
+      "bidang": "Pariwisata",
+      "deskripsi": "Mempelajari industri pariwisata, manajemen perjalanan wisata, tour guiding, reservasi tiket domestik dan internasional, hospitality, destinasi wisata lokal dan nasional, bahasa asing untuk pariwisata, serta kewirausahaan di bidang pariwisata.",
+      "mata_pelajaran_utama": ["Industri Pariwisata", "Tour Guiding", "Reservasi Tiket", "Hospitality", "Bahasa Asing Pariwisata"],
+      "durasi_pendidikan": "3 tahun (6 semester)",
+      "sertifikasi": ["Sertifikasi Tour Guide", "Sertifikasi Reservasi"],
+      "prospek_kerja": ["Tour Guide", "Travel Agent", "Staf Reservasi", "Tour Operator", "Hospitality Staff", "Event Organizer"],
+      "mitra_du_di": ["Biro Perjalanan Wisata", "Hotel", "Maskapai Penerbangan", "Dinas Pariwisata NTB"]
+    },
+    {
+      "id": "rpl",
+      "nama": "Rekayasa Perangkat Lunak",
+      "singkatan": "RPL",
+      "bidang": "Teknologi",
+      "deskripsi": "Mempelajari pengembangan perangkat lunak, pemrograman web (HTML, CSS, JavaScript, PHP), pemrograman mobile (Android/iOS), pemrograman desktop, database (MySQL, PostgreSQL), UI/UX design, software engineering, dan pengujian perangkat lunak.",
+      "mata_pelajaran_utama": ["Pemrograman Web", "Pemrograman Mobile", "Basis Data", "UI/UX Design", "Software Engineering"],
+      "durasi_pendidikan": "3 tahun (6 semester)",
+      "sertifikasi": ["Sertifikasi Web Developer", "Sertifikasi Mobile Developer"],
+      "prospek_kerja": ["Web Developer", "Mobile Developer", "Software Engineer", "UI/UX Designer", "Database Administrator", "IT Consultant"],
+      "mitra_du_di": ["Perusahaan Teknologi", "Startup", "Software House", "Perusahaan Digital"]
+    },
+    {
+      "id": "tkj",
+      "nama": "Teknik Komputer dan Jaringan",
+      "singkatan": "TKJ",
+      "bidang": "Teknologi",
+      "deskripsi": "Mempelajari perakitan dan perbaikan komputer, jaringan dasar dan lanjutan (LAN, MAN, WAN), administrasi jaringan, konfigurasi router dan switch, keamanan jaringan, pemrograman web dasar, serta instalasi dan konfigurasi sistem operasi.",
+      "mata_pelajaran_utama": ["Perakitan Komputer", "Jaringan Dasar", "Administrasi Jaringan", "Keamanan Jaringan", "Sistem Operasi"],
+      "durasi_pendidikan": "3 tahun (6 semester)",
+      "sertifikasi": ["Sertifikasi Network Administrator", "CCNA (Cisco)"],
+      "prospek_kerja": ["Network Engineer", "IT Support", "System Administrator", "Teknisi Komputer", "Network Security", "Data Center Staff"],
+      "mitra_du_di": ["ISP", "Perusahaan IT", "Data Center", "Instansi Pemerintah"]
+    },
+    {
+      "id": "brt",
+      "nama": "Bisnis Retail",
+      "singkatan": "BRT",
+      "bidang": "Bisnis dan Manajemen",
+      "deskripsi": "Mempelajari manajemen retail modern, merchandising, pelayanan pelanggan (customer service), manajemen inventaris dan gudang, strategi penjualan ritel, visual merchandising, serta pengelolaan toko retail.",
+      "mata_pelajaran_utama": ["Manajemen Retail", "Merchandising", "Customer Service", "Manajemen Inventaris", "Visual Merchandising"],
+      "durasi_pendidikan": "3 tahun (6 semester)",
+      "sertifikasi": ["Sertifikasi Retail Associate"],
+      "prospek_kerja": ["Store Manager", "Merchandiser", "Sales Associate", "Inventory Staff", "Retail Business Owner", "Visual Merchandiser"],
+      "mitra_du_di": ["Supermarket", "Department Store", "Franchise Retail", "Perusahaan Distribusi"]
+    },
+    {
+      "id": "lps",
+      "nama": "Lembaga Perbankan Syariah",
+      "singkatan": "LPS",
+      "bidang": "Keuangan",
+      "deskripsi": "Mempelajari perbankan syariah, ekonomi Islam, produk-produk bank syariah (mudharabah, musyarakah, murabahah, ijarah), akad-akad perbankan syariah, layanan keuangan syariah, dan administrasi pembiayaan syariah.",
+      "mata_pelajaran_utama": ["Perbankan Syariah", "Ekonomi Islam", "Produk Bank Syariah", "Akad Perbankan", "Administrasi Pembiayaan"],
+      "durasi_pendidikan": "3 tahun (6 semester)",
+      "sertifikasi": ["Sertifikasi Perbankan Syariah"],
+      "prospek_kerja": ["Staf Bank Syariah", "Customer Service Bank", "Teller", "Administrasi Pembiayaan", "Marketing Bank", "Staf Lembaga Keuangan Syariah"],
+      "mitra_du_di": ["Bank Syariah", "BPRS", "Lembaga Keuangan Mikro Syariah", "Asuransi Syariah"]
+    },
+    {
+      "id": "dkv",
+      "nama": "Desain Komunikasi Visual",
+      "singkatan": "DKV",
+      "bidang": "Desain dan Kreatif",
+      "deskripsi": "Mempelajari desain grafis, tipografi, fotografi, videografi, branding dan identitas merek, ilustrasi, desain media cetak (brosur, poster, buku), desain media digital (web, mobile), motion graphics, dan editing video.",
+      "mata_pelajaran_utama": ["Desain Grafis", "Fotografi", "Videografi", "Branding", "Tipografi", "Motion Graphics"],
+      "durasi_pendidikan": "3 tahun (6 semester)",
+      "sertifikasi": ["Sertifikasi Desainer Grafis Muda"],
+      "prospek_kerja": ["Graphic Designer", "Brand Identity Designer", "Visual Artist", "Multimedia Designer", "Creative Director", "Video Editor"],
+      "mitra_du_di": ["Studio Desain", "Advertising Agency", "Media Production", "Perusahaan Kreatif"]
+    },
+    {
+      "id": "animasi",
+      "nama": "Animasi",
+      "singkatan": "ANM",
+      "bidang": "Desain dan Kreatif",
+      "deskripsi": "Mempelajari animasi 2D dan 3D, storyboard, character design, motion graphics, visual effects (VFX), compositing, rendering, dan produksi film animasi.",
+      "mata_pelajaran_utama": ["Animasi 2D", "Animasi 3D", "Storyboard", "Character Design", "Motion Graphics", "VFX"],
+      "durasi_pendidikan": "3 tahun (6 semester)",
+      "sertifikasi": ["Sertifikasi Animator"],
+      "prospek_kerja": ["Animator", "Motion Graphic Designer", "Character Designer", "Storyboard Artist", "VFX Artist", "Game Developer"],
+      "mitra_du_di": ["Studio Animasi", "Production House", "Game Studio", "Perusahaan Multimedia"]
+    }
+  ],
+  "spmb": {
+    "deskripsi": "Seleksi Penerimaan Murid Baru (SPMB) SMKN 2 Mataram dilaksanakan setiap tahun untuk menjaring calon siswa baru dari seluruh Indonesia.",
+    "jadwal": "Pendaftaran biasanya dibuka bulan April-Mei setiap tahun. Pengumuman hasil seleksi umumnya bulan Juni-Juli. Tahun ajaran baru dimulai bulan Juli.",
+    "jalur_pendaftaran": [
+      {
+        "nama": "Jalur Zonasi",
+        "keterangan": "Berdasarkan jarak tempat tinggal ke sekolah, kuota minimal 50% dari daya tampung",
+        "kuota": "50%"
+      },
+      {
+        "nama": "Jalur Afirmasi",
+        "keterangan": "Untuk siswa dari keluarga tidak mampu (pemegang KIP/PIP) dan siswa berkebutuhan khusus, kuota minimal 15%",
+        "kuota": "15%"
+      },
+      {
+        "nama": "Jalur Perpindahan Tugas Orang Tua",
+        "keterangan": "Untuk siswa yang orang tuanya pindah tugas ke wilayah NTB",
+        "kuota": "5%"
+      },
+      {
+        "nama": "Jalur Prestasi",
+        "keterangan": "Berdasarkan prestasi akademik (nilai rapor) dan non-akademik (juara lomba/kompetisi), kuota maksimal 30%",
+        "kuota": "30%"
+      }
+    ],
+    "persyaratan_umum": [
+      "Warga Negara Indonesia",
+      "Lulusan SMP/MTs/sederajat tahun berjalan atau 2 tahun sebelumnya",
+      "Berusia maksimal 21 tahun pada awal tahun ajaran",
+      "Telah memiliki ijazah atau Surat Keterangan Lulus (SKL)",
+      "Sehat jasmani dan rohani (surat keterangan sehat)",
+      "Tidak buta warna untuk jurusan tertentu (DKV, Animasi, TKJ)"
+    ],
+    "berkas_pendaftaran": [
+      "Fotokopi Kartu Keluarga (KK) yang dilegalisir",
+      "Fotokopi Akta Kelahiran",
+      "Fotokopi Ijazah/SKL SMP/MTs yang dilegalisir",
+      "Pas foto berwarna 3x4 (background merah) 4 lembar",
+      "Fotokopi rapor SMP/MTs semester 1-5 yang dilegalisir",
+      "Surat keterangan sehat dari dokter/puskesmas",
+      "Kartu KIP/PIP/KKS (jika ada, untuk jalur afirmasi)",
+      "Portofolio (untuk jurusan DKV dan Animasi)"
+    ],
+    "tahapan": [
+      "Pendaftaran online melalui portal SPMB",
+      "Verifikasi berkas oleh panitia",
+      "Tes potensi akademik (TPA)",
+      "Tes fisik/kesamaptaan (untuk jurusan tertentu)",
+      "Wawancara dan portofolio (untuk jurusan tertentu)",
+      "Pengumuman hasil seleksi",
+      "Daftar ulang bagi calon siswa yang diterima"
+    ],
+    "info_tambahan": "Pendaftaran dilakukan secara online. Informasi resmi hanya melalui website smkn2mataram.sch.id dan akun resmi sekolah. Hati-hati terhadap penipuan mengatasnamakan panitia SPMB."
+  },
+  "prestasi": [
+    "Akreditasi A (Sangat Baik)",
+    "Juara 1 LKS (Lomba Kompetensi Siswa) Tingkat Provinsi NTB bidang Web Technology",
+    "Juara 2 LKS Tingkat Provinsi bidang Akuntansi",
+    "Juara 1 Paskibra Tingkat Kota Mataram",
+    "Juara Umum O2SN Tingkat Kota Mataram",
+    "Sekolah Adiwiyata Tingkat Kota",
+    "Sekolah Bebas Narkoba (Program Bersinar)"
+  ],
+  "fasilitas": [
+    { "nama": "Laboratorium Komputer", "jumlah": 4, "keterangan": "Untuk praktik RPL, TKJ, dan umum" },
+    { "nama": "Laboratorium Akuntansi", "jumlah": 2, "keterangan": "Praktik komputer akuntansi" },
+    { "nama": "Laboratorium Bahasa", "jumlah": 1, "keterangan": "Praktik listening dan speaking" },
+    { "nama": "Perpustakaan", "jumlah": 1, "keterangan": "Koleksi buku 5000+ judul" },
+    { "nama": "Lapangan Olahraga", "jumlah": 2, "keterangan": "Lapangan basket dan voli" },
+    { "nama": "Mushola", "jumlah": 1, "keterangan": "Kapasitas 200 jamaah" },
+    { "nama": "Ruang Praktik Jurusan", "jumlah": 10, "keterangan": "Sesuai kompetensi keahlian" },
+    { "nama": "Kantin", "jumlah": 2, "keterangan": "Kantin sehat" },
+    { "nama": "UKS", "jumlah": 1, "keterangan": "Dengan tenaga kesehatan" },
+    { "nama": "Free WiFi", "jumlah": 1, "keterangan": "Akses internet 24 jam" },
+    { "nama": "Studio Multimedia", "jumlah": 1, "keterangan": "Untuk jurusan DKV dan Animasi" },
+    { "nama": "Ruang OSIS", "jumlah": 1, "keterangan": "Sekretariat organisasi siswa" }
+  ],
+  "ekstrakurikuler": [
+    { "nama": "Paskibra", "hari": "Sabtu", "pembina": "Guru Olahraga" },
+    { "nama": "Pramuka", "hari": "Jumat", "pembina": "Guru PKN" },
+    { "nama": "PMR (Palang Merah Remaja)", "hari": "Sabtu", "pembina": "Guru BK" },
+    { "nama": "OSIS", "hari": "Sesuai agenda", "pembina": "Guru Pembina OSIS" },
+    { "nama": "Rohis (Rohani Islam)", "hari": "Jumat", "pembina": "Guru Agama" },
+    { "nama": "Basket", "hari": "Selasa & Kamis" },
+    { "nama": "Voli", "hari": "Selasa & Kamis" },
+    { "nama": "Futsal", "hari": "Rabu & Jumat" },
+    { "nama": "Pencak Silat", "hari": "Sabtu" },
+    { "nama": "Seni Musik", "hari": "Sabtu" },
+    { "nama": "Seni Tari", "hari": "Sabtu" },
+    { "nama": "English Club", "hari": "Rabu" }
+  ],
+  "bantuan_siswa": [
+    {
+      "program": "PIP (Program Indonesia Pintar)",
+      "sumber": "Kemendikbudristek",
+      "besaran": "Rp 1.000.000/tahun",
+      "syarat": "Pemegang KIP, atau dari keluarga tidak mampu"
+    },
+    {
+      "program": "KIP (Kartu Indonesia Pintar) Kuliah",
+      "sumber": "Kemendikbudristek",
+      "besaran": "Biaya pendidikan + living cost",
+      "syarat": "Siswa berprestasi dari keluarga tidak mampu"
+    },
+    {
+      "program": "Beasiswa Prestasi",
+      "sumber": "Sekolah & Mitra",
+      "besaran": "Bervariasi",
+      "syarat": "Peringkat 10 besar paralel"
+    }
+  ],
+  "kontak": {
+    "telepon": "0370 633654",
+    "fax": "0370 629654",
+    "email": "smkn2mtr@gmail.com",
+    "website": "smkn2mataram.sch.id",
+    "alamat": "Jl. Pemuda No. 18, Dasan Agung Baru, Kec. Selaparang, Kota Mataram, NTB 83126",
+    "jam_kerja": "Senin - Jumat, 07:30 - 15:00 WITA",
+    "maps_link": "https://maps.google.com/?q=SMKN+2+Mataram+Jl+Pemuda+18"
+  },
+  "faq": [
+    {
+      "pertanyaan": "Apa saja jurusan di SMKN 2 Mataram?",
+      "jawaban": "SMKN 2 Mataram memiliki 10+ kompetensi keahlian: Akuntansi (AKL), Manajemen Perkantoran (MPK), Bisnis Digital (BDG), Usaha Perjalanan Wisata (UPW), Rekayasa Perangkat Lunak (RPL), Teknik Komputer dan Jaringan (TKJ), Bisnis Retail (BRT), Lembaga Perbankan Syariah (LPS), Desain Komunikasi Visual (DKV), dan Animasi (ANM)."
+    },
+    {
+      "pertanyaan": "Kapan pendaftaran SPMB dibuka?",
+      "jawaban": "Pendaftaran SPMB biasanya dibuka bulan April-Mei setiap tahun. Pengumuman hasil seleksi Juni-Juli. Pantau website smkn2mataram.sch.id untuk info resmi terbaru."
+    },
+    {
+      "pertanyaan": "Berapa biaya sekolah di SMKN 2 Mataram?",
+      "jawaban": "SMKN 2 Mataram adalah sekolah negeri, TIDAK memungut biaya SPP. Biaya sukarela untuk seragam, buku, dan kegiatan sekolah. Program bantuan PIP (Rp1.000.000/tahun) dan KIP tersedia bagi siswa yang memenuhi syarat."
+    },
+    {
+      "pertanyaan": "Apakah ada asrama di SMKN 2 Mataram?",
+      "jawaban": "Saat ini SMKN 2 Mataram tidak menyediakan fasilitas asrama. Siswa diharapkan tinggal bersama orang tua/wali atau di tempat tinggal yang sesuai."
+    },
+    {
+      "pertanyaan": "Bagaimana prospek kerja lulusan SMKN 2 Mataram?",
+      "jawaban": "Lulusan SMKN 2 Mataram memiliki prospek kerja luas. Banyak alumni bekerja di perusahaan, perbankan, industri kreatif, teknologi, PNS, dan wirausaha. Sekolah memiliki MoU dengan berbagai DU/DI untuk PKL dan penyaluran kerja."
+    },
+    {
+      "pertanyaan": "Apakah ada tes fisik untuk masuk?",
+      "jawaban": "Beberapa jurusan mewajibkan tes fisik/kesamaptaan. Detail tes akan diumumkan panitia SPMB saat pendaftaran."
+    },
+    {
+      "pertanyaan": "Bagaimana cara daftar SMKN 2 Mataram?",
+      "jawaban": "Pendaftaran online via portal SPMB yang diumumkan di website resmi. Siapkan: KK, Akta Lahir, pas foto 3x4, rapor SMP semester 1-5, dan surat sehat."
+    },
+    {
+      "pertanyaan": "Apakah lulusan SMP dari luar NTB bisa mendaftar?",
+      "jawaban": "Bisa. SMKN 2 Mataram menerima siswa dari seluruh Indonesia. Perhatikan aturan zonasi dan jalur pendaftaran yang berlaku."
+    },
+    {
+      "pertanyaan": "Apa perbedaan RPL dan TKJ?",
+      "jawaban": "RPL fokus pada pembuatan perangkat lunak (coding, web, mobile, database). TKJ fokus pada perangkat keras dan jaringan (komputer, router, server, keamanan jaringan). Keduanya bidang teknologi tapi RPL ke arah software, TKJ ke arah hardware dan jaringan."
+    },
+    {
+      "pertanyaan": "Apakah ada beasiswa di SMKN 2?",
+      "jawaban": "Ada beberapa program: PIP (Rp1.000.000/tahun) pemegang KIP, KIP Kuliah untuk lanjut PT, dan Beasiswa Prestasi untuk peringkat 10 besar. Semua tidak dipungut biaya."
+    }
+  ],
+  "struktur_organisasi": {
+    "kepala_sekolah": "H. Munawar, S.Sos., S.Kom., M.M.",
+    "wakasek_kurikulum": "Guru Senior",
+    "wakasek_kesiswaan": "Guru Senior",
+    "wakasek_humas": "Guru Senior",
+    "wakasek_sarpras": "Guru Senior",
+    "operator_sekolah": "Jadiawan",
+    "bimbingan_konseling": "Tim BK"
+  }
+}
