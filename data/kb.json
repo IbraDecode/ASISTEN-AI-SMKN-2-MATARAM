@@ -8,11 +8,11 @@
     "akreditasi_no": "053/BAN-SM/SK/2019",
     "kepala_sekolah": "H. Munawar, S.Sos., S.Kom., M.M.",
     "komite_sekolah": "Drs. TGH. Muhtar",
-    "alamat": "Jl. Pemuda No. 18, Dasan Agung Baru, Kec. Selaparang, Kota Mataram, NTB",
-    "telepon": "0370 633654",
-    "fax": "0370 629654",
-    "email": "smkn2mtr@gmail.com",
-    "website": "smkn2mataram.sch.id",
+    "alamat": "Jalan Pemuda No. 18 Mataram 831125 NTB",
+    "telepon": "0370-633654",
+    "fax": "0370-633654",
+    "email": "humassmkn2mataram@gmail.com, bos@smkn2mataram.sch.id",
+    "website": "https://www.smkn2mataram.sch.id",
     "total_siswa": 1523,
     "total_guru": 94,
     "total_pegawai": 29,
@@ -142,8 +142,8 @@
     }
   ],
   "spmb": {
-    "deskripsi": "Seleksi Penerimaan Murid Baru (SPMB) SMKN 2 Mataram dilaksanakan setiap tahun untuk menjaring calon siswa baru dari seluruh Indonesia.",
-    "jadwal": "Pendaftaran biasanya dibuka bulan April-Mei setiap tahun. Pengumuman hasil seleksi umumnya bulan Juni-Juli. Tahun ajaran baru dimulai bulan Juli.",
+    "deskripsi": "Seleksi Penerimaan Murid Baru (SPMB) SMKN 2 Mataram dilaksanakan setiap tahun untuk menjaring calon siswa baru dari seluruh Indonesia. Untuk periode terbaru, pendaftaran murid baru sudah dibuka berdasarkan info operasional sekolah.",
+    "jadwal": "SPMB periode terbaru sudah dibuka. Jadwal detail, portal pendaftaran, verifikasi, seleksi, pengumuman, dan daftar ulang mengikuti pengumuman resmi sekolah/provinsi. Pantau website resmi sekolah dan kanal resmi SPMB.",
     "jalur_pendaftaran": [
       {
         "nama": "Jalur Zonasi",
@@ -193,7 +193,7 @@
       "Pengumuman hasil seleksi",
       "Daftar ulang bagi calon siswa yang diterima"
     ],
-    "info_tambahan": "Pendaftaran dilakukan secara online. Informasi resmi hanya melalui website smkn2mataram.sch.id dan akun resmi sekolah. Hati-hati terhadap penipuan mengatasnamakan panitia SPMB."
+    "info_tambahan": "Pendaftaran dilakukan melalui kanal/portal SPMB resmi yang diumumkan sekolah atau provinsi. Informasi resmi hanya melalui website https://www.smkn2mataram.sch.id, akun resmi sekolah, dan kanal resmi SPMB. Hati-hati terhadap penipuan mengatasnamakan panitia SPMB."
   },
   "prestasi": [
     "Rapor Pendidikan Terbaik SMA/SMK/SLB Se-Provinsi NTB - AiSO 2025",
@@ -258,26 +258,53 @@
     }
   ],
   "kontak": {
-    "telepon": "0370 633654",
-    "fax": "0370 629654",
-    "email": "smkn2mtr@gmail.com",
-    "website": "smkn2mataram.sch.id",
-    "alamat": "Jl. Pemuda No. 18, Dasan Agung Baru, Kec. Selaparang, Kota Mataram, NTB 83126",
+    "telepon": "0370-633654",
+    "fax": "0370-633654",
+    "email": "humassmkn2mataram@gmail.com, bos@smkn2mataram.sch.id",
+    "website": "https://www.smkn2mataram.sch.id",
+    "alamat": "Jalan Pemuda No. 18 Mataram 831125 NTB",
     "jam_kerja": "Senin - Jumat, 07:30 - 15:00 WITA",
-    "maps_link": "https://maps.google.com/?q=SMKN+2+Mataram+Jl+Pemuda+18",
-    "facebook": "SMK Negeri 2 Mataram (@smeda.mataram)",
-    "facebook_url": "https://facebook.com/smeda.mataram",
-    "youtube": "SMKN 2 Mataram - Galeri Video",
-    "youtube_url": "https://smkn2mataram.sch.id/video.html"
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=SMK+Negeri+2+Mataram+Jalan+Pemuda+No+18+Mataram",
+    "facebook": "Smknduamataram",
+    "facebook_url": "https://www.facebook.com/people/Smknduamataram/100068234784961/",
+    "instagram": "Smknduamataram",
+    "instagram_url": "https://www.instagram.com/Smknduamataram",
+    "youtube": "SMKN 2 Mataram",
+    "youtube_url": "https://www.youtube.com/channel/UCp4noPu8V3_zEk7W4tKI4Nw",
+    "sumber_resmi": "https://www.smkn2mataram.sch.id/kontak.html"
   },
   "faq": [
+    {
+      "pertanyaan": "Kontak resmi sekolah SMKN 2 Mataram",
+      "jawaban": "Kontak resmi SMKN 2 Mataram: Telepon/Fax 0370-633654. Email humassmkn2mataram@gmail.com dan bos@smkn2mataram.sch.id. Website https://www.smkn2mataram.sch.id. Alamat Jalan Pemuda No. 18 Mataram 831125 NTB. Sumber: halaman kontak resmi sekolah."
+    },
+    {
+      "pertanyaan": "Kontak SMKN 2 Mataram",
+      "jawaban": "Kontak SMKN 2 Mataram: Telepon/Fax 0370-633654, email humassmkn2mataram@gmail.com dan bos@smkn2mataram.sch.id, website https://www.smkn2mataram.sch.id, alamat Jalan Pemuda No. 18 Mataram 831125 NTB."
+    },
+    {
+      "pertanyaan": "Alamat lokasi sekolah SMKN 2 Mataram",
+      "jawaban": "Alamat SMKN 2 Mataram adalah Jalan Pemuda No. 18 Mataram 831125 NTB. Google Maps: https://www.google.com/maps/search/?api=1&query=SMK+Negeri+2+Mataram+Jalan+Pemuda+No+18+Mataram"
+    },
+    {
+      "pertanyaan": "Map maps google maps SMKN 2 Mataram",
+      "jawaban": "Google Maps SMKN 2 Mataram: https://www.google.com/maps/search/?api=1&query=SMK+Negeri+2+Mataram+Jalan+Pemuda+No+18+Mataram. Alamat: Jalan Pemuda No. 18 Mataram 831125 NTB."
+    },
+    {
+      "pertanyaan": "Info terbaru SMKN 2 Mataram 2026",
+      "jawaban": "Info resmi terbaru yang tampil di website SMKN 2 Mataram tahun 2026 antara lain Pengumuman Kelulusan Peserta Didik Kelas XII TP. 2025/2026 yang diterbitkan 30 April 2026. Untuk info terbaru berikutnya, cek website resmi https://www.smkn2mataram.sch.id atau halaman berita/pengumuman resmi sekolah."
+    },
+    {
+      "pertanyaan": "Pengumuman kelulusan kelas XII 2025 2026 SMKN 2 Mataram",
+      "jawaban": "Website resmi SMKN 2 Mataram memuat Pengumuman Kelulusan Peserta Didik Kelas XII TP. 2025/2026 pada 30 April 2026. Buka halaman resmi: https://www.smkn2mataram.sch.id/post/read/468/pengumuman-kelulusan-peserta-didik-kelas-xii-tp-20252026.html"
+    },
     {
       "pertanyaan": "Apa saja jurusan di SMKN 2 Mataram?",
       "jawaban": "SMKN 2 Mataram memiliki 7 program keahlian unggulan: Akuntansi & Keuangan Lembaga (AKL), Manajemen Perkantoran (MPK), Bisnis Digital (BD), Usaha Perjalanan Wisata (UPW), Rekayasa Perangkat Lunak (RPL), Bisnis Retail (BRT), dan Teknik Komputer & Jaringan (TKJ). Ada juga program tambahan: Perbankan Syariah, DKV, Animasi."
     },
     {
       "pertanyaan": "Kapan pendaftaran SPMB dibuka?",
-      "jawaban": "Pendaftaran SPMB biasanya dibuka bulan April-Mei setiap tahun. Pengumuman hasil seleksi Juni-Juli. Pantau website smkn2mataram.sch.id untuk info resmi terbaru."
+      "jawaban": "Pendaftaran SPMB SMKN 2 Mataram periode terbaru sudah dibuka. Jadwal detail dan portal pendaftaran mengikuti pengumuman resmi sekolah/provinsi. Pantau https://www.smkn2mataram.sch.id dan kanal resmi SPMB."
     },
     {
       "pertanyaan": "Berapa biaya sekolah di SMKN 2 Mataram?",
@@ -297,7 +324,7 @@
     },
     {
       "pertanyaan": "Bagaimana cara daftar SMKN 2 Mataram?",
-      "jawaban": "Pendaftaran online via portal SPMB yang diumumkan di website resmi. Siapkan: KK, Akta Lahir, pas foto 3x4, rapor SMP semester 1-5, dan surat sehat."
+      "jawaban": "Daftar melalui kanal/portal SPMB resmi yang diumumkan sekolah atau provinsi. Siapkan: KK, Akta Lahir, ijazah/SKL SMP/MTs, pas foto 3x4, rapor SMP semester 1-5, surat sehat, dan KIP/PIP/KKS jika mendaftar jalur afirmasi."
     },
     {
       "pertanyaan": "Apakah lulusan SMP dari luar NTB bisa mendaftar?",
@@ -413,11 +440,11 @@
     },
     {
       "pertanyaan": "Kapan pendaftaran SPMB",
-      "jawaban": "Pendaftaran SPMB dibuka April-Mei setiap tahun. Pengumuman Juni-Juli. Pantau smkn2mataram.sch.id untuk info resmi."
+      "jawaban": "Pendaftaran SPMB SMKN 2 Mataram periode terbaru sudah dibuka. Cek jadwal detail dan portal resmi melalui https://www.smkn2mataram.sch.id atau kanal SPMB resmi yang diumumkan sekolah/provinsi."
     },
     {
       "pertanyaan": "Cara daftar SMKN 2 Mataram",
-      "jawaban": "Daftar online via portal SPMB. Siapkan: KK, Akta Lahir, pas foto 3x4 (merah), rapor SMP semester 1-5, surat sehat. Jalur: Zonasi (50%), Afirmasi (15%), Pindah Tugas (5%), Prestasi (30%)."
+      "jawaban": "Daftar melalui kanal/portal SPMB resmi yang diumumkan sekolah/provinsi. Siapkan: KK, Akta Lahir, ijazah/SKL, pas foto 3x4, rapor SMP semester 1-5, surat sehat, dan dokumen jalur khusus jika ada. Jalur umum: Zonasi, Afirmasi, Pindah Tugas Orang Tua, dan Prestasi."
     },
     {
       "pertanyaan": "Biaya sekolah SMKN 2",
@@ -429,7 +456,7 @@
     },
     {
       "pertanyaan": "Alamat SMKN 2 Mataram",
-      "jawaban": "Jl. Pemuda No. 18, Dasan Agung Baru, Kec. Selaparang, Kota Mataram, NTB 83126. Telepon: 0370 633654. Email: smkn2mtr@gmail.com."
+      "jawaban": "Alamat SMKN 2 Mataram adalah Jalan Pemuda No. 18 Mataram 831125 NTB. Telepon/Fax: 0370-633654. Email: humassmkn2mataram@gmail.com dan bos@smkn2mataram.sch.id."
     },
     {
       "pertanyaan": "Jam istirahat sekolah",
@@ -441,15 +468,15 @@
     },
     {
       "pertanyaan": "Alamat SMKN 2 Mataram dimana",
-      "jawaban": "Jl. Pemuda No. 18, Dasan Agung Baru, Kec. Selaparang, Kota Mataram, NTB 83126. Telepon: 0370 633654. Email: smkn2mtr@gmail.com."
+      "jawaban": "Alamat SMKN 2 Mataram adalah Jalan Pemuda No. 18 Mataram 831125 NTB. Google Maps: https://www.google.com/maps/search/?api=1&query=SMK+Negeri+2+Mataram+Jalan+Pemuda+No+18+Mataram"
     },
     {
       "pertanyaan": "Lokasi SMKN 2 Mataram",
-      "jawaban": "Jl. Pemuda No. 18, Dasan Agung Baru, Kec. Selaparang, Kota Mataram, NTB 83126. Dekat pusat kota, akses mudah."
+      "jawaban": "Lokasi SMKN 2 Mataram: Jalan Pemuda No. 18 Mataram 831125 NTB. Google Maps: https://www.google.com/maps/search/?api=1&query=SMK+Negeri+2+Mataram+Jalan+Pemuda+No+18+Mataram"
     },
     {
       "pertanyaan": "alamat sekolah smkn 2 mataram",
-      "jawaban": "Jl. Pemuda No. 18, Dasan Agung Baru, Kec. Selaparang, Kota Mataram, NTB 83126. Telepon: 0370 633654. Email: smkn2mtr@gmail.com."
+      "jawaban": "Alamat sekolah SMKN 2 Mataram: Jalan Pemuda No. 18 Mataram 831125 NTB. Telepon/Fax: 0370-633654. Email: humassmkn2mataram@gmail.com dan bos@smkn2mataram.sch.id."
     },
     {
       "pertanyaan": "Pulang sekolah jam",
@@ -485,23 +512,23 @@
     },
     {
       "pertanyaan": "kontak smkn 2 mataram",
-      "jawaban": "📍 Jl. Pemuda No. 18, Dasan Agung Baru, Kec. Selaparang, Kota Mataram, NTB 83126\n📞 0370 633654\n📧 smkn2mtr@gmail.com\n🌐 smkn2mataram.sch.id\n⏰ Senin-Jumat 07:30-15:00 WITA"
+      "jawaban": "Kontak SMKN 2 Mataram: Alamat Jalan Pemuda No. 18 Mataram 831125 NTB. Telepon/Fax 0370-633654. Email humassmkn2mataram@gmail.com dan bos@smkn2mataram.sch.id. Website https://www.smkn2mataram.sch.id. Jam kerja Senin-Jumat 07:30-15:00 WITA."
     },
     {
       "pertanyaan": "nomor telepon sekolah",
-      "jawaban": "Telepon: 0370 633654 | Fax: 0370 629654 | Email: smkn2mtr@gmail.com"
+      "jawaban": "Telepon/Fax resmi SMKN 2 Mataram: 0370-633654. Email: humassmkn2mataram@gmail.com dan bos@smkn2mataram.sch.id."
     },
     {
       "pertanyaan": "facebook smkn 2 mataram",
-      "jawaban": "FB: SMK Negeri 2 Mataram (@smeda.mataram) - https://facebook.com/smeda.mataram"
+      "jawaban": "Facebook resmi yang ditautkan website SMKN 2 Mataram: Smknduamataram - https://www.facebook.com/people/Smknduamataram/100068234784961/"
     },
     {
       "pertanyaan": "youtube smkn 2 mataram",
-      "jawaban": "Galeri video SMKN 2 Mataram: https://smkn2mataram.sch.id/video.html"
+      "jawaban": "YouTube yang ditautkan website SMKN 2 Mataram: https://www.youtube.com/channel/UCp4noPu8V3_zEk7W4tKI4Nw"
     },
     {
       "pertanyaan": "sosial media sekolah",
-      "jawaban": "FB: @smeda.mataram | Web: smkn2mataram.sch.id | Email: smkn2mtr@gmail.com | Telp: 0370 633654"
+      "jawaban": "Media sosial resmi yang ditautkan website SMKN 2 Mataram: Facebook Smknduamataram, Instagram https://www.instagram.com/Smknduamataram, YouTube https://www.youtube.com/channel/UCp4noPu8V3_zEk7W4tKI4Nw. Website: https://www.smkn2mataram.sch.id."
     },
     {
       "pertanyaan": "jumlah siswa smkn 2",
