@@ -1,18 +1,7 @@
 /**
- * Streaming Response Simulator
- * 
- * Mengirim jawaban AI dalam beberapa bagian dengan delay
- * untuk mensimulasikan efek "mengetik" seperti ChatGPT.
- * 
- * Cara kerja:
- *   1. Split jawaban jadi beberapa chunk
- *   2. Kirim chunk 1 → wait 2 detik → kirim chunk 2 → ...
- *   3. Setelah selesai, kirim feedback buttons
+ * Streaming Response — kirim semua chunk tanpa delay
+ * WA tidak butuh efek typing, jadi kirim langsung semua bagian.
  */
-
-const MIN_DELAY = 1000;
-const MAX_DELAY = 3000;
-const CHARS_PER_SECOND = 25;
 
 class Streamer {
   constructor(whatsappClient) {
@@ -22,18 +11,14 @@ class Streamer {
 
   async stream(userId, chunks, options = {}) {
     const {
-      feedbackCallback = null,
-      minDelay = MIN_DELAY,
-      maxDelay = MAX_DELAY,
-      charsPerSecond = CHARS_PER_SECOND
+      feedbackCallback = null
     } = options;
 
     if (this.activeStreams.has(userId)) {
-      // Already streaming to this user, wait
       await this.activeStreams.get(userId);
     }
 
-    const streamPromise = this._doStream(userId, chunks, { minDelay, maxDelay, charsPerSecond, feedbackCallback });
+    const streamPromise = this._doStream(userId, chunks, { feedbackCallback });
     this.activeStreams.set(userId, streamPromise);
     try {
       await streamPromise;
@@ -42,7 +27,7 @@ class Streamer {
     }
   }
 
-  async _doStream(userId, chunks, { minDelay, maxDelay, charsPerSecond, feedbackCallback }) {
+  async _doStream(userId, chunks, { feedbackCallback }) {
     if (!chunks || chunks.length === 0) return;
 
     for (let i = 0; i < chunks.length; i++) {
@@ -50,22 +35,13 @@ class Streamer {
       if (!chunk.trim()) continue;
 
       const prefix = chunks.length > 1 ? `(${i + 1}/${chunks.length}) ` : "";
-      const message = prefix + chunk;
-
       try {
-        await this.wa.sendMessage(userId, message);
+        await this.wa.sendMessage(userId, prefix + chunk);
       } catch (err) {
         console.error(`[STREAM ERR] ${userId}: ${err.message}`);
       }
-
-      // Delay between chunks (simulate typing)
-      if (i < chunks.length - 1) {
-        const charDelay = Math.min(Math.max(chunk.length / charsPerSecond * 1000, minDelay), maxDelay);
-        await sleep(charDelay);
-      }
     }
 
-    // Send feedback buttons after all chunks
     if (feedbackCallback && typeof feedbackCallback === "function") {
       try {
         await feedbackCallback(userId);

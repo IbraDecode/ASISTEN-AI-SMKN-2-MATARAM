@@ -106,6 +106,59 @@ class WhatsAppClient {
     }
   }
 
+  async sendListMessage(to, text, buttonLabel, sections) {
+    await this._rateLimit();
+
+    const body = {
+      messaging_product: "whatsapp",
+      recipient_type: "individual",
+      to: to,
+      type: "interactive",
+      interactive: {
+        type: "list",
+        body: { text: String(text).substring(0, 1024) },
+        action: {
+          button: String(buttonLabel).substring(0, 20),
+          sections: (sections || []).slice(0, 10)
+        }
+      }
+    };
+
+    try {
+      const res = await this._fetch(this.baseUrl, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${this.accessToken}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+      });
+      const result = await res.json();
+      if (!result.error) this.conversationCount++;
+      return result;
+    } catch (err) {
+      console.error(`[WA LIST FAIL] ${to}: ${err.message}`);
+      return { error: { message: err.message } };
+    }
+  }
+
+  async markAsRead(to, messageId) {
+    try {
+      await this._fetch(this.baseUrl, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${this.accessToken}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          messaging_product: "whatsapp",
+          status: "read",
+          message_id: messageId
+        })
+      });
+    } catch (_) {}
+  }
+
   async _rateLimit() {
     const now = Date.now();
     const elapsed = now - this.lastSendTime;
@@ -148,6 +201,15 @@ class WhatsAppClient {
           ...base,
           text: msg.interactive.button_reply.title,
           buttonId: msg.interactive.button_reply.id,
+          isButton: true
+        };
+      }
+
+      if (msg.type === "interactive" && msg.interactive?.list_reply) {
+        return {
+          ...base,
+          text: msg.interactive.list_reply.title,
+          buttonId: msg.interactive.list_reply.id,
           isButton: true
         };
       }

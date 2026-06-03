@@ -49,6 +49,10 @@ class AppDatabase {
         answered INTEGER DEFAULT 0,
         created_at TEXT DEFAULT (datetime('now'))
       );
+
+      CREATE INDEX IF NOT EXISTS idx_messages_user_time ON messages(user_id, created_at);
+      CREATE INDEX IF NOT EXISTS idx_messages_created ON messages(created_at);
+      CREATE INDEX IF NOT EXISTS idx_unanswered_status ON unanswered(answered, created_at);
     `);
   }
 

@@ -13,6 +13,12 @@ const LANGUAGES = {
     menu_jurusan: "📚 Jurusan",
     menu_spmb: "📋 SPMB",
     menu_kontak: "📞 Kontak",
+    menu_prestasi: "🏆 Prestasi",
+    menu_ekskul: "⚽ Ekstrakurikuler",
+    menu_fasilitas: "🏫 Fasilitas",
+    menu_beasiswa: "🎓 Bantuan Siswa",
+    menu_guru: "👨‍🏫 Guru & Staff",
+    menu_bantuan: "❓ Bantuan",
     back: "🔙 Kembali",
     feedback_positive: "👍 Berguna",
     feedback_negative: "👎 Tidak",
@@ -32,6 +38,12 @@ const LANGUAGES = {
     menu_jurusan: "📚 Majors",
     menu_spmb: "📋 Admission",
     menu_kontak: "📞 Contact",
+    menu_prestasi: "🏆 Achievements",
+    menu_ekskul: "⚽ Extracurricular",
+    menu_fasilitas: "🏫 Facilities",
+    menu_beasiswa: "🎓 Student Aid",
+    menu_guru: "👨‍🏫 Teachers & Staff",
+    menu_bantuan: "❓ Help",
     back: "🔙 Back",
     feedback_positive: "👍 Helpful",
     feedback_negative: "👎 Not Helpful",
@@ -51,6 +63,12 @@ const LANGUAGES = {
     menu_jurusan: "📚 Jurusan",
     menu_spmb: "📋 SPMB",
     menu_kontak: "📞 Kontak",
+    menu_prestasi: "🏆 Prestasi",
+    menu_ekskul: "⚽ Ekstrakurikuler",
+    menu_fasilitas: "🏫 Fasilitas",
+    menu_beasiswa: "🎓 Bantuan Siswa",
+    menu_guru: "👨‍🏫 Guru & Staff",
+    menu_bantuan: "❓ Bantuan",
     back: "🔙 Walik",
     feedback_positive: "👍 Berguna",
     feedback_negative: "👎 Ndeq",
@@ -100,6 +118,9 @@ function getString(lang, key, params = {}) {
   return text;
 }
 
+let kbCache = null;
+function setKbCache(kb) { kbCache = kb; }
+
 function getWelcomeButtons(name, lang) {
   return {
     text: getString(lang, "welcome", { name }),
@@ -107,6 +128,54 @@ function getWelcomeButtons(name, lang) {
       { id: "menu_jurusan", title: getString(lang, "menu_jurusan") },
       { id: "menu_spmb", title: getString(lang, "menu_spmb") },
       { id: "menu_kontak", title: getString(lang, "menu_kontak") }
+    ]
+  };
+}
+
+function getWelcomeList(name, lang) {
+  return {
+    type: "list",
+    text: getString(lang, "welcome", { name }),
+    button: getString(lang, "menu_jurusan").startsWith("📚") ? "📋 Pilih Menu" : "📋 Menu",
+    sections: [
+      {
+        title: "📖 Informasi",
+        rows: [
+          { id: "menu_jurusan", title: getString(lang, "menu_jurusan"), description: `${kbCache?.data?.jurusan?.length || 0} kompetensi keahlian` },
+          { id: "menu_spmb", title: getString(lang, "menu_spmb"), description: "Syarat & jadwal pendaftaran" },
+          { id: "menu_prestasi", title: getString(lang, "menu_prestasi"), description: "Prestasi sekolah" },
+          { id: "menu_ekskul", title: getString(lang, "menu_ekskul"), description: "Kegiatan ekstrakurikuler" },
+          { id: "menu_fasilitas", title: getString(lang, "menu_fasilitas"), description: "Sarana & prasarana" },
+          { id: "menu_beasiswa", title: getString(lang, "menu_beasiswa"), description: "PIP/KIP & beasiswa" }
+        ]
+      },
+      {
+        title: "🔗 Lainnya",
+        rows: [
+          { id: "menu_guru", title: getString(lang, "menu_guru"), description: "Direktori guru & staff" },
+          { id: "menu_kontak", title: getString(lang, "menu_kontak"), description: "Alamat, telepon, email" },
+          { id: "lang_menu", title: getString(lang, "switch_language"), description: "Ganti bahasa" },
+          { id: "menu_bantuan", title: getString(lang, "menu_bantuan"), description: "Cara menggunakan bot" }
+        ]
+      }
+    ]
+  };
+}
+
+function getJurusanList(jurusan, lang) {
+  return {
+    type: "list",
+    text: lang === "en" ? "Select a major for details:" : "Pilih jurusan untuk detail:",
+    button: lang === "en" ? "Majors" : "Jurusan",
+    sections: [
+      {
+        title: lang === "en" ? "Majors" : "Daftar Jurusan",
+        rows: jurusan.map(j => ({
+          id: `jurusan_${j.id}`,
+          title: j.singkatan,
+          description: j.nama.substring(0, 40)
+        }))
+      }
     ]
   };
 }
@@ -137,6 +206,9 @@ module.exports = {
   detectLanguage,
   getString,
   getWelcomeButtons,
+  getWelcomeList,
+  getJurusanList,
   getFeedbackButtons,
-  getLanguageMenu
+  getLanguageMenu,
+  setKbCache
 };

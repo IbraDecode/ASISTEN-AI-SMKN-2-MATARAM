@@ -12,9 +12,12 @@ const { Streamer, sleep } = require("./streamer");
 const {
   getString,
   getWelcomeButtons,
+  getWelcomeList,
+  getJurusanList,
   getFeedbackButtons,
   getLanguageMenu,
-  LANGUAGES
+  LANGUAGES,
+  setKbCache
 } = require("./language");
 const {
   sanitize,
@@ -36,6 +39,7 @@ const whatsapp = new WhatsAppClient({
 
 const kb = new KnowledgeBase();
 kb.load();
+setKbCache(kb);
 watchKb(kb, () => {
   for (const [id] of Object.entries(aiPool)) {
     aiPool[id].setContext(kb.getContext());
@@ -83,10 +87,10 @@ async function handleIncoming(from, name, rawText, isButton, buttonId) {
     return handleButton(from, name, buttonId, dbSession, lang);
   }
 
-  // ─── First message → welcome menu ───
-  if (dbSession.message_count === 0 && text.length < 3) {
+  // ─── First message → welcome menu (always, regardless of text length) ───
+  if (dbSession.message_count === 0) {
     db.updateSession(from, { message_count: 1, state: "MENU" });
-    return getWelcomeButtons(name || from, lang);
+    return getWelcomeList(name || from, lang);
   }
 
   // ─── Language command ───
@@ -94,10 +98,26 @@ async function handleIncoming(from, name, rawText, isButton, buttonId) {
     return getLanguageMenu(lang);
   }
 
-  // ─── Menu command ───
+  // ─── Help command ───
+  if (text.match(/^(help|bantuan|tolong|\/help|\/bantuan)$/i)) {
+    return {
+      type: "text",
+      text: getString(lang, "help_text", {
+        name: name || "Kak",
+        menu: getString(lang, "welcome", { name: "" }).split("\n")[0]
+      }) || `Halo ${name || "Kak"}! 👋\n\nSaya asisten AI SMKN 2 Mataram. Saya bisa:\n• Info jurusan (RPL, TKJ, AKL, dll)\n• Syarat & jadwal SPMB\n• Fasilitas & ekstrakurikuler\n• Prestasi sekolah\n• Kontak sekolah\n\nCukup ketik pertanyaan atau pilih menu. Ketik 'menu' untuk kembali kapan saja.`
+    };
+  }
+
+  // ─── Language command ───
+  if (text.match(/^(bahasa|language|lang|\/language|\/bahasa)/i)) {
+    return getLanguageMenu(lang);
+  }
+
+  // ─── Menu command (including back) ───
   if (text.match(/^(menu|kembali|back|start|awal|home)$/i)) {
     db.updateSession(from, { state: "MENU" });
-    return getWelcomeButtons(name || from, lang);
+    return getWelcomeList(name || from, lang);
   }
 
   // ─── Process question ───
@@ -129,6 +149,11 @@ function handleButton(from, name, buttonId, dbSession, lang) {
     }
   }
 
+  // ─── Language menu button ───
+  if (buttonId === "lang_menu") {
+    return getLanguageMenu(lang);
+  }
+
   // ─── Feedback ───
   if (buttonId.startsWith("feedback_up") || buttonId.startsWith("feedback_down")) {
     const rating = buttonId.startsWith("feedback_up") ? "up" : "down";
@@ -139,31 +164,71 @@ function handleButton(from, name, buttonId, dbSession, lang) {
     return { type: "text", text: getString(lang, "thanks_feedback"), thenMenu: true };
   }
 
+  const d = kb.data;
+
   // ─── Menu buttons ───
   const menuHandlers = {
     menu_jurusan: () => {
-      const j = kb.data.jurusan;
+      const j = d.jurusan;
       return {
-        type: "buttons",
+        type: "list",
         text: `${lang === "en" ? "Majors at SMKN 2 Mataram" : "Jurusan SMKN 2 Mataram"}\n\n${j.map((x, i) => `${i + 1}. ${x.nama} (${x.singkatan})`).join("\n")}`,
-        buttons: j.slice(0, 5).map(x => ({ id: `jurusan_${x.id}`, title: x.singkatan }))
+        button: lang === "en" ? "Select Major" : "Pilih Jurusan",
+        sections: [{
+          title: lang === "en" ? "Majors" : "Daftar Jurusan",
+          rows: j.map(x => ({
+            id: `jurusan_${x.id}`,
+            title: x.singkatan,
+            description: x.nama.substring(0, 40)
+          }))
+        }]
       };
     },
     menu_spmb: () => ({
       type: "text",
-      text: `${lang === "en" ? "Admission" : "SPMB SMKN 2 Mataram"}\n\n${lang === "en" ? "Registration opens April-May. Requirements: Indonesian citizen, SMP graduate, max 21 years old." : "Pendaftaran buka April-Mei. Syarat: WNI, lulusan SMP, max 21 tahun."}\n\n📞 ${kb.data.kontak.telepon}\n🌐 ${kb.data.kontak.website}`
+      text: `${lang === "en" ? "Admission" : "SPMB SMKN 2 Mataram"}\n\n${lang === "en" ? "Registration opens April-May. Requirements: Indonesian citizen, SMP graduate, max 21 years old." : "Pendaftaran buka April-Mei. Syarat: WNI, lulusan SMP, max 21 tahun."}\n\n📞 ${d.kontak.telepon}\n🌐 ${d.kontak.website}`
     }),
+    menu_prestasi: () => ({
+      type: "text",
+      text: `🏆 *${lang === "en" ? "Achievements" : "Prestasi SMKN 2 Mataram"}*\n\n${(d.prestasi || []).map((p, i) => `${i + 1}. ${p}`).join("\n")}`
+    }),
+    menu_ekskul: () => ({
+      type: "text",
+      text: `⚽ *${lang === "en" ? "Extracurricular" : "Ekstrakurikuler"}*\n\n${(d.ekstrakurikuler || []).map(e => `• ${e.nama || e}${e.hari ? ` (${e.hari})` : ""}`).join("\n")}`
+    }),
+    menu_fasilitas: () => ({
+      type: "text",
+      text: `🏫 *${lang === "en" ? "Facilities" : "Fasilitas"}*\n\n${(d.fasilitas || []).map(f => `• ${f}`).join("\n")}`
+    }),
+    menu_beasiswa: () => {
+      const bs = d.bantuan_siswa;
+      return {
+        type: "text",
+        text: `🎓 *${lang === "en" ? "Student Financial Aid" : "Bantuan Siswa"}*\n\n${bs ? `${bs.deskripsi}\n\n📋 ${lang === "en" ? "Programs:" : "Program:"}\n${(bs.program || []).map(p => `• ${p.nama}: ${p.keterangan}`).join("\n")}` : "Info belum tersedia."}`
+      };
+    },
+    menu_guru: () => {
+      const so = d.struktur_organisasi || {};
+      return {
+        type: "text",
+        text: `👨‍🏫 *${lang === "en" ? "Teachers & Staff" : "Guru & Staff SMKN 2 Mataram"}*\n\n${Object.entries(so).map(([k, v]) => `• ${k.replace(/_/g, " ").toUpperCase()}: ${v}`).join("\n")}`
+      };
+    },
     menu_kontak: () => ({
       type: "text",
-      text: `📍 ${kb.data.kontak.alamat}\n📞 ${kb.data.kontak.telepon}\n📧 ${kb.data.kontak.email}\n🌐 ${kb.data.kontak.website}`
+      text: `📍 ${d.kontak.alamat}\n📞 ${d.kontak.telepon}\n📧 ${d.kontak.email}\n🌐 ${d.kontak.website}`
     }),
-    menu_kembali: () => getWelcomeButtons(name || from, lang)
+    menu_bantuan: () => ({
+      type: "text",
+      text: `❓ *${lang === "en" ? "How to Use" : "Cara Menggunakan"}*\n\n${lang === "en" ? "Just type your question or choose from the menu. I can help with:\n• School profile\n• Majors info\n• Admission info\n• Facilities & extracurricular\n• Contact info\n\nType 'menu' anytime to return." : "Cukup ketik pertanyaan atau pilih dari menu. Saya bisa bantu:\n• Profil sekolah\n• Info jurusan\n• Info SPMB\n• Fasilitas & ekskul\n• Kontak sekolah\n\nKetik 'menu' kapan saja untuk kembali."}`
+    }),
+    menu_kembali: () => getWelcomeList(name || from, lang)
   };
 
   // Jurusan detail
   if (buttonId.startsWith("jurusan_")) {
     const jId = buttonId.replace("jurusan_", "");
-    const jurusan = kb.data.jurusan.find(j => j.id === jId || j.singkatan.toLowerCase() === jId);
+    const jurusan = d.jurusan.find(j => j.id === jId || j.singkatan.toLowerCase() === jId);
     if (jurusan) {
       return {
         type: "text",
@@ -176,7 +241,7 @@ function handleButton(from, name, buttonId, dbSession, lang) {
   if (handler) return handler();
 
   // Fallback
-  return getWelcomeButtons(name || from, lang);
+  return getWelcomeList(name || from, lang);
 }
 
 async function processQuestion(from, name, text, dbSession, lang) {
@@ -246,8 +311,10 @@ async function sendReply(from, reply, lang, name) {
 
   if (reply.thenMenu) {
     await sleep(1000);
-    const menu = getWelcomeButtons(name || from, lang || "id");
-    if (menu.buttons) {
+    const menu = getWelcomeList(name || from, lang || "id");
+    if (menu.sections) {
+      await whatsapp.sendListMessage(from, menu.text, menu.button, menu.sections);
+    } else if (menu.buttons) {
       await whatsapp.sendButtonMessage(from, menu.text, menu.buttons);
     }
     return;
@@ -276,6 +343,12 @@ async function sendReply(from, reply, lang, name) {
     for (const part of parts) {
       await whatsapp.sendMessage(from, part);
     }
+    return;
+  }
+
+  // List Message
+  if (reply.type === "list" && reply.sections) {
+    await whatsapp.sendListMessage(from, reply.text, reply.button || "Pilih", reply.sections);
     return;
   }
 
@@ -315,9 +388,17 @@ app.post("/webhook", async (req, res) => {
   const start = Date.now();
   const { from, text: rawText, name, isButton, buttonId, type: msgType } = parsed;
 
+  // Mark as read
+  if (parsed.msgId) {
+    whatsapp.markAsRead(from, parsed.msgId);
+  }
+
   // Rate limit
   const rateCheck = rateLimiter.check(from);
-  if (!rateCheck.allowed) return;
+  if (!rateCheck.allowed) {
+    await whatsapp.sendMessage(from, "Mohon tunggu sebentar, Anda terlalu cepat mengirim pesan. Silakan coba lagi dalam beberapa detik.");
+    return;
+  }
 
   // Validate button ID
   if (isButton && buttonId && !validateButtonId(buttonId)) return;
@@ -338,6 +419,7 @@ app.post("/webhook", async (req, res) => {
     console.log(`[⬆ OK] ${from} (${Date.now() - start}ms)`);
   } catch (err) {
     console.error(`[❌ ERR] ${from}: ${err.message.substring(0, 100)}`);
+    await whatsapp.sendMessage(from, "Maaf, terjadi kesalahan. Silakan coba lagi atau ketik 'menu'.");
   }
 });
 
