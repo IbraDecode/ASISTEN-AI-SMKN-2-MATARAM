@@ -46,6 +46,15 @@ const TOPICS = [
   }
 ];
 
+function escapeRegex(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function hasKeyword(text, keyword) {
+  const pattern = new RegExp(`(^|\\W)${escapeRegex(keyword)}($|\\W)`, "i");
+  return pattern.test(text);
+}
+
 function detectIntent(text) {
   const q = text.toLowerCase().trim();
 
@@ -54,7 +63,7 @@ function detectIntent(text) {
   const scores = TOPICS.map((topic) => {
     let score = 0;
     for (const kw of topic.keywords) {
-      if (q.includes(kw)) {
+      if (hasKeyword(q, kw)) {
         score += kw.length / q.length;
       }
     }
