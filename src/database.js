@@ -114,12 +114,13 @@ class AppDatabase {
   }
 
   async getConversationContext(userId, limit = 6) {
-    return this.prisma.message.findMany({
+    const rows = await this.prisma.message.findMany({
       where: { userId },
-      orderBy: { createdAt: "asc" },
+      orderBy: { createdAt: "desc" },
       take: limit,
       select: { role: true, content: true }
     });
+    return rows.reverse();
   }
 
   // ─── Feedback ───
