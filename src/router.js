@@ -16,7 +16,7 @@ const TOPICS = [
   },
   {
     id: "spmb",
-    keywords: ["spmb", "ppdb", "daftar", "pendaftaran", "syarat", "berkas", "seleksi", "jalur", "zonasi", "afirmasi", "prestasi", "nilai", "tes", "fisik", "wawancara", "pengumuman", "ulang", "masuk", "mendaftar", "daftar ulang"],
+    keywords: ["spmb", "ppdb", "daftar", "pendaftaran", "syarat", "berkas", "seleksi", "jalur", "zonasi", "afirmasi", "prestasi", "nilai", "tes", "fisik", "wawancara", "pengumuman", "ulang", "mendaftar", "daftar ulang", "masuk sekolah"],
     label: "SPMB / Pendaftaran"
   },
   {

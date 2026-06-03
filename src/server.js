@@ -160,7 +160,7 @@ async function handleButton(from, name, buttonId, dbSession, lang) {
   if (buttonId.startsWith("lang_")) {
     const newLang = buttonId.replace("lang_", "");
     if (LANGUAGES[newLang]) {
-      await db.updateSession(from, { language: newLang, state: "MENU" });
+      await db.updateSession(from, { language: newLang, state: "MENU", message_count: Math.max(1, (dbSession.message_count || 0) + 1) });
       return {
         type: "text",
         text: getString(newLang, "language_set", { lang: LANGUAGES[newLang].name }),
