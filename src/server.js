@@ -27,12 +27,16 @@ const whatsapp = new WhatsAppClient({
 const kb = new KnowledgeBase();
 kb.load();
 setKbCache(kb);
-watchKb(kb, () => {
-  for (const [id] of Object.entries(aiPool)) {
-    aiPool[id].setContext(kb.getContext());
-  }
-  console.log("[WATCH] AI pool context updated");
-});
+
+// Skip file watcher on Vercel (read-only filesystem)
+if (!process.env.VERCEL) {
+  watchKb(kb, () => {
+    for (const [id] of Object.entries(aiPool)) {
+      aiPool[id].setContext(kb.getContext());
+    }
+    console.log("[WATCH] AI pool context updated");
+  });
+}
 
 const streamer = new Streamer(whatsapp);
 const rateLimiter = new RateLimiter();
@@ -49,39 +53,50 @@ function getAI(userId) {
   return aiPool[userId];
 }
 
-setInterval(() => {
-  db?.cleanupSessions(120);
-  rateLimiter.cleanup();
+// ─── Lazy initialization (Vercel-compatible) ───
+let dbReady = false;
 
-  const now = Date.now();
-  const ids = Object.keys(aiPool);
-
-  // Hapus instance yang expired (>30 menit tidak dipakai)
-  for (const id of ids) {
-    if ((now - (aiPoolTimestamps[id] || 0)) > AI_POOL_TTL) {
-      delete aiPool[id];
-      delete aiPoolTimestamps[id];
-    }
+app.use(async (req, res, next) => {
+  if (dbReady) return next();
+  try {
+    db = await new AppDatabase().init();
+    dbReady = true;
+    const info = kb.data;
+    console.log(`[INIT] DB ready | ${info.jurusan.length} jurusan, ${info.faq.length} FAQ`);
+  } catch (err) {
+    console.error("[INIT FAIL]", err);
+    return res.status(500).json({ error: "Database initialization failed" });
   }
+  next();
+});
 
-  // Juga cleanup kalau pool terlalu besar
-  const remaining = Object.keys(aiPool).length;
-  if (remaining > 100) {
-    const sorted = Object.entries(aiPoolTimestamps)
-      .sort((a, b) => a[1] - b[1]); // oldest first
-    const toDelete = sorted.slice(0, remaining - 50);
-    for (const [id] of toDelete) {
-      delete aiPool[id];
-      delete aiPoolTimestamps[id];
+// ─── Intervals (only in long-running mode, not on Vercel) ───
+if (!process.env.VERCEL) {
+  setInterval(() => {
+    db?.cleanupSessions(120);
+    rateLimiter.cleanup();
+    const now = Date.now();
+    for (const id of Object.keys(aiPool)) {
+      if ((now - (aiPoolTimestamps[id] || 0)) > AI_POOL_TTL) {
+        delete aiPool[id];
+        delete aiPoolTimestamps[id];
+      }
     }
-  }
-}, 60 * 1000);
+    const remaining = Object.keys(aiPool).length;
+    if (remaining > 100) {
+      const sorted = Object.entries(aiPoolTimestamps).sort((a, b) => a[1] - b[1]);
+      for (const [id] of sorted.slice(0, remaining - 50)) {
+        delete aiPool[id];
+        delete aiPoolTimestamps[id];
+      }
+    }
+  }, 60 * 1000);
 
-setInterval(async () => {
-  await autoLearnFromAI();
-}, 30 * 60 * 1000);
+  setInterval(async () => {
+    await autoLearnFromAI();
+  }, 30 * 60 * 1000);
+}
 
-// ─── Auto-learn from AI ───
 async function autoLearnFromAI() {
   if (!db) return;
   const unanswered = await db.getUnanswered(20);
@@ -695,26 +710,12 @@ app.post("/webhook/group", async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 
-async function start() {
-  db = await new AppDatabase().init();
+// Local: listen on port (Vercel handles this itself)
+if (!process.env.VERCEL) {
   app.listen(PORT, () => {
-    console.log(`\n  ╔══════════════════════════════════════════════╗`);
-    console.log(`  ║       SMKN 2 Mataram AI Assistant v4       ║`);
-    console.log(`  ║  Database: Supabase PostgreSQL             ║`);
-    console.log(`  ║  Prisma ORM v7                             ║`);
-    console.log(`  ╠══════════════════════════════════════════════╣`);
-    console.log(`  ║  Languages: id, en, sas                    ║`);
-    console.log(`  ║  Streaming: ON (chunked + feedback)        ║`);
-    console.log(`  ║  Webhook  : http://localhost:${PORT}/webhook  ║`);
-    console.log(`  ╠══════════════════════════════════════════════╣`);
-    console.log(`  ║  Jurusan  : ${kb.data.jurusan.length}         │ FAQ: ${kb.data.faq.length}      ║`);
-    console.log(`  ║  KB Size  : ${kb.getContext().length} chars             ║`);
-    console.log(`  ║  AI Pool  : 0 instances                    ║`);
-    console.log(`  ╚══════════════════════════════════════════════╝\n`);
+    console.log(`[SERVER] Listening on :${PORT}`);
   });
 }
 
-start().catch(err => {
-  console.error("[FATAL]", err);
-  process.exit(1);
-});
+// Export for Vercel serverless runtime
+module.exports = app;
