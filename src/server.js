@@ -95,12 +95,12 @@ async function handleIncoming(from, name, rawText, isButton, buttonId) {
   }
 
   if (text.match(/^(help|bantuan|tolong|\/help|\/bantuan)$/i)) {
-    return {
-      type: "text",
-      text: getString(lang, "help_text", {
-        name: name || "Kak",
-        menu: getString(lang, "welcome", { name: "" }).split("\n")[0]
-      }) || `Halo ${name || "Kak"}! 👋\n\nSaya asisten AI SMKN 2 Mataram. Saya bisa:\n• Info jurusan (RPL, TKJ, AKL, dll)\n• Syarat & jadwal SPMB\n• Fasilitas & ekstrakurikuler\n• Prestasi sekolah\n• Kontak sekolah\n\nCukup ketik pertanyaan atau pilih menu. Ketik 'menu' untuk kembali kapan saja.`
+    const helpText = getString(lang, "help_text", {
+      name: name || "Kak",
+      menu: (getString(lang, "welcome", { name: "" }) || "").split("\n")[0]
+    });
+    return { type: "text", text: helpText ||
+      `Halo ${name || "Kak"}! 👋\n\nSaya asisten AI SMKN 2 Mataram. Saya bisa:\n• Info jurusan (RPL, TKJ, AKL, dll)\n• Syarat & jadwal SPMB\n• Fasilitas & ekstrakurikuler\n• Prestasi sekolah\n• Kontak sekolah\n\nCukup ketik pertanyaan atau pilih menu. Ketik 'menu' untuk kembali kapan saja.`
     };
   }
 
@@ -109,10 +109,11 @@ async function handleIncoming(from, name, rawText, isButton, buttonId) {
     return getWelcomeList(name || from, lang);
   }
 
+  // Simpan pertanyaan user SEBELUM proses AI
+  await db.saveMessage(from, name || "", "user", text, "user", "general", lang);
+
   await db.updateSession(from, { message_count: dbSession.message_count + 1, state: "ASKING" });
   const reply = await processQuestion(from, name, text, dbSession, lang);
-
-  await db.saveMessage(from, name || "", "user", text, "user", reply.topic || "general", lang);
 
   const replyContent = typeof reply.text === "string" ? reply.text : JSON.stringify(reply.text);
   const msgId = await db.saveMessage(from, name || "", "ai", replyContent, reply.source || "ai", reply.topic || "general", lang);
@@ -519,12 +520,16 @@ app.post("/broadcast", authMiddleware, async (req, res) => {
   let sent = 0;
   let failed = 0;
 
-  for (const uid of userIds) {
-    try {
-      await whatsapp.sendMessage(uid, message);
-      sent++;
-    } catch {
-      failed++;
+  // Kirim parallel — 10 batch
+  const CONCURRENCY = 10;
+  for (let i = 0; i < userIds.length; i += CONCURRENCY) {
+    const batch = userIds.slice(i, i + CONCURRENCY);
+    const results = await Promise.allSettled(
+      batch.map(uid => whatsapp.sendMessage(uid, message))
+    );
+    for (const r of results) {
+      if (r.status === "fulfilled") sent++;
+      else failed++;
     }
   }
 

@@ -27,7 +27,8 @@ const LANGUAGES = {
     switch_language: "🌐 Bahasa",
     choose_language: "Pilih bahasa:",
     language_set: "Bahasa diubah ke {lang} ✅",
-    type_help: "Ketik 'menu' untuk kembali ke menu utama"
+    type_help: "Ketik 'menu' untuk kembali ke menu utama",
+    help_text: "Halo {name}! 👋\n\nSaya asisten AI SMKN 2 Mataram. Saya bisa:\n• Info jurusan (RPL, TKJ, AKL, dll)\n• Syarat & jadwal SPMB\n• Fasilitas & ekstrakurikuler\n• Prestasi sekolah\n• Kontak sekolah\n\nCukup ketik pertanyaan atau pilih menu. Ketik 'menu' untuk kembali kapan saja."
   },
 
   en: {
@@ -52,7 +53,8 @@ const LANGUAGES = {
     switch_language: "🌐 Language",
     choose_language: "Choose language:",
     language_set: "Language changed to {lang} ✅",
-    type_help: "Type 'menu' to return to main menu"
+    type_help: "Type 'menu' to return to main menu",
+    help_text: "Hello {name}! 👋\n\nI'm the SMKN 2 Mataram AI Assistant. I can help with:\n• Majors info (RPL, TKJ, AKL, etc.)\n• Admission requirements & schedule\n• Facilities & extracurricular\n• School achievements\n• Contact info\n\nJust type your question or pick from the menu. Type 'menu' anytime to return."
   },
 
   sas: {
@@ -77,7 +79,8 @@ const LANGUAGES = {
     switch_language: "🌐 Bahasa",
     choose_language: "Pilih bahasa:",
     language_set: "Bahasa ubah dadi {lang} ✅",
-    type_help: "Ketik 'menu' balik ka menu utama"
+    type_help: "Ketik 'menu' balik ka menu utama",
+    help_text: "Halo {name}! 👋\n\nTiang asisten AI SMKN 2 Mataram. Tiang isa mantul:\n• Info jurusan (RPL, TKJ, AKL, dll)\n• Syarat & jadwal SPMB\n• Fasilitas & ekstrakurikuler\n• Prestasi sekolah\n• Kontak sekolah\n\nCukup ketik pertanyaan atau pilih menu. Ketik 'menu' balik kapan aja."
   }
 };
 

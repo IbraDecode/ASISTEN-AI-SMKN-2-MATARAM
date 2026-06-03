@@ -3,16 +3,27 @@ const nodeFetch = require("node-fetch");
 const MAX_BUTTONS = 3;
 const MAX_TEXT_LENGTH = 4096;
 
+// Deduplication: skip message IDs yg sudah diproses
+const processedIds = new Set();
+const DEDUP_TTL = 10000;
+
 class WhatsAppClient {
   constructor(config) {
     this.phoneNumberId = config.phoneNumberId;
     this.accessToken = config.accessToken;
     this.verifyToken = config.verifyToken;
-    this.apiVersion = "v18.0";
+    this.apiVersion = "v22.0";
     this.baseUrl = `https://graph.facebook.com/${this.apiVersion}/${this.phoneNumberId}/messages`;
     this.lastSendTime = 0;
     this.minInterval = 200;
+    this.sendQueue = Promise.resolve();
     this.conversationCount = 0;
+  }
+
+  // Rate limit mutex — antre semua send biar gak tabrakan
+  _enqueue(fn) {
+    this.sendQueue = this.sendQueue.then(fn, fn);
+    return this.sendQueue;
   }
 
   async _fetch(url, opts, retries = 2) {
@@ -22,8 +33,11 @@ class WhatsAppClient {
         const timeout = setTimeout(() => controller.abort(), 10000);
         const res = await nodeFetch(url, { ...opts, signal: controller.signal });
         clearTimeout(timeout);
-        if (res.status === 429 && i < retries) {
-          await new Promise((r) => setTimeout(r, 2000 * (i + 1)));
+
+        // Retry rate limits + server errors
+        if ((res.status === 429 || res.status >= 500) && i < retries) {
+          const delay = res.status === 429 ? 2000 : 1000;
+          await new Promise((r) => setTimeout(r, delay * (i + 1)));
           continue;
         }
         return res;
@@ -34,9 +48,19 @@ class WhatsAppClient {
     }
   }
 
-  async sendMessage(to, text) {
-    await this._rateLimit();
+  // Cek apakah message ID sudah diproses (dedup)
+  isDuplicate(msgId) {
+    if (!msgId) return false;
+    if (processedIds.has(msgId)) return true;
+    processedIds.add(msgId);
+    // Bersihin cache lama tiap 100 entry
+    if (processedIds.size > 1000) {
+      setTimeout(() => processedIds.clear(), DEDUP_TTL);
+    }
+    return false;
+  }
 
+  async sendMessage(to, text) {
     const body = {
       messaging_product: "whatsapp",
       recipient_type: "individual",
@@ -45,22 +69,25 @@ class WhatsAppClient {
       text: { preview_url: false, body: String(text).substring(0, MAX_TEXT_LENGTH) }
     };
 
-    try {
-      const res = await this._fetch(this.baseUrl, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${this.accessToken}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(body)
-      });
-      const result = await res.json();
-      if (!result.error) this.conversationCount++;
-      return result;
-    } catch (err) {
-      console.error(`[WA SEND FAIL] ${to}: ${err.message}`);
-      return { error: { message: err.message } };
-    }
+    return this._enqueue(async () => {
+      await this._rateLimit();
+      try {
+        const res = await this._fetch(this.baseUrl, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(body)
+        });
+        const result = await res.json();
+        if (!result.error) this.conversationCount++;
+        return result;
+      } catch (err) {
+        console.error(`[WA SEND FAIL] ${to}: ${err.message}`);
+        return { error: { message: err.message } };
+      }
+    });
   }
 
   async sendButtonMessage(to, text, buttons) {
@@ -68,8 +95,6 @@ class WhatsAppClient {
     if (safeButtons.length === 0) {
       return this.sendMessage(to, text);
     }
-
-    await this._rateLimit();
 
     const body = {
       messaging_product: "whatsapp",
@@ -88,27 +113,28 @@ class WhatsAppClient {
       }
     };
 
-    try {
-      const res = await this._fetch(this.baseUrl, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${this.accessToken}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(body)
-      });
-      const result = await res.json();
-      if (!result.error) this.conversationCount++;
-      return result;
-    } catch (err) {
-      console.error(`[WA BUTTON FAIL] ${to}: ${err.message}`);
-      return { error: { message: err.message } };
-    }
+    return this._enqueue(async () => {
+      await this._rateLimit();
+      try {
+        const res = await this._fetch(this.baseUrl, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(body)
+        });
+        const result = await res.json();
+        if (!result.error) this.conversationCount++;
+        return result;
+      } catch (err) {
+        console.error(`[WA BUTTON FAIL] ${to}: ${err.message}`);
+        return { error: { message: err.message } };
+      }
+    });
   }
 
   async sendListMessage(to, text, buttonLabel, sections) {
-    await this._rateLimit();
-
     const body = {
       messaging_product: "whatsapp",
       recipient_type: "individual",
@@ -124,22 +150,25 @@ class WhatsAppClient {
       }
     };
 
-    try {
-      const res = await this._fetch(this.baseUrl, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${this.accessToken}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(body)
-      });
-      const result = await res.json();
-      if (!result.error) this.conversationCount++;
-      return result;
-    } catch (err) {
-      console.error(`[WA LIST FAIL] ${to}: ${err.message}`);
-      return { error: { message: err.message } };
-    }
+    return this._enqueue(async () => {
+      await this._rateLimit();
+      try {
+        const res = await this._fetch(this.baseUrl, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(body)
+        });
+        const result = await res.json();
+        if (!result.error) this.conversationCount++;
+        return result;
+      } catch (err) {
+        console.error(`[WA LIST FAIL] ${to}: ${err.message}`);
+        return { error: { message: err.message } };
+      }
+    });
   }
 
   async markAsRead(to, messageId) {
@@ -156,7 +185,9 @@ class WhatsAppClient {
           message_id: messageId
         })
       });
-    } catch (_) {}
+    } catch (err) {
+      console.error(`[WA MARKREAD FAIL] ${to}: ${err.message}`);
+    }
   }
 
   async _rateLimit() {
@@ -191,6 +222,12 @@ class WhatsAppClient {
         name: entry.contacts?.[0]?.profile?.name || "User",
         type: msg.type
       };
+
+      // Dedup
+      if (this.isDuplicate(msg.id)) {
+        console.log(`[DEDUP] ${msg.id}`);
+        return null;
+      }
 
       if (msg.type === "text" && msg.text?.body) {
         return { ...base, text: msg.text.body };
