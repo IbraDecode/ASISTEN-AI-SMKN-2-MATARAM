@@ -250,6 +250,36 @@ class WhatsAppClient {
     });
   }
 
+  async sendContact(to, contact) {
+    const body = {
+      messaging_product: "whatsapp",
+      recipient_type: "individual",
+      to: to,
+      type: "contacts",
+      contacts: [contact]
+    };
+
+    return this._enqueue(async () => {
+      await this._rateLimit();
+      try {
+        const res = await this._fetch(this.baseUrl, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(body)
+        });
+        const result = await res.json();
+        if (!result.error) this.conversationCount++;
+        return result;
+      } catch (err) {
+        console.error(`[WA CONTACT FAIL] ${to}: ${err.message}`);
+        return { error: { message: err.message } };
+      }
+    });
+  }
+
   async sendCTAButton(to, text, url, buttonLabel, opts = {}) {
     const body = {
       messaging_product: "whatsapp",
