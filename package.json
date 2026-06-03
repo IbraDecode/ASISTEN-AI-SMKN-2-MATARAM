@@ -7,8 +7,8 @@
     "start": "node src/server.js",
     "train": "node train/ingest.js",
     "dev": "node src/server.js",
-    "postinstall": "npx prisma generate --schema=prisma/schema.prisma && node -e \"const fs=require('fs');const d='src/generated/prisma';if(!fs.existsSync(d+'/client.js')){fs.readdirSync(d).filter(f=>f.endsWith('.ts')).forEach(f=>fs.copyFileSync(d+'/'+f,d+'/'+f.replace('.ts','.js')))}\"",
-    "vercel-build": "npx prisma generate --schema=prisma/schema.prisma && node -e \"const fs=require('fs');const d='src/generated/prisma';fs.readdirSync(d).filter(f=>f.endsWith('.ts')).forEach(f=>fs.copyFileSync(d+'/'+f,d+'/'+f.replace('.ts','.js')))\""
+    "postinstall": "npx prisma generate --schema=prisma/schema.prisma",
+    "vercel-build": "npx prisma generate --schema=prisma/schema.prisma"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",

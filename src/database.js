@@ -1,11 +1,9 @@
 require("dotenv").config();
+const { PrismaClient } = require("./generated/prisma/client.js");
+const { PrismaPg } = require("@prisma/adapter-pg");
 
 class AppDatabase {
   async init() {
-    const [{ PrismaClient }, { PrismaPg }] = await Promise.all([
-      import("./generated/prisma/client.js"),
-      import("@prisma/adapter-pg")
-    ]);
     this.prisma = new PrismaClient({
       adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
     });

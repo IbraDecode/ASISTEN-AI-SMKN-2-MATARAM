@@ -7,3 +7,5 @@ data/smkn2.db
 .DS_Store
 npm-debug.log*
 generated/
+!src/generated/
+.vercel
