@@ -289,6 +289,14 @@ async function processQuestion(from, name, text, dbSession, lang) {
     console.error(`[AI FAIL] ${from}: ${err.message}`);
     Analytics.trackError(from, err.message);
 
+    if (err.message.includes("SAFETY")) {
+      return {
+        text: `${getString(lang, "sorry_unanswered", { name: name || "Kak" })}\n\nAI safety filter menolak pertanyaan ini. Silakan coba pertanyaan lain atau hubungi sekolah melalui:\n📞 ${kb.data.kontak.telepon}\n📧 ${kb.data.kontak.email}`,
+        source: "safety_block",
+        topic
+      };
+    }
+
     const fb = kb.search(text);
     if (fb.length > 0 && fb[0].data.jawaban) {
       return { text: toWhatsApp(fb[0].data.jawaban), source: "kb", topic };
@@ -456,7 +464,10 @@ app.get("/health", (req, res) => {
     status: "ok",
     uptime: process.uptime(),
     memory: process.memoryUsage().rss,
-    gemini: GeminiClient.getCircuitState ? GeminiClient.getCircuitState() : { open: false },
+    gemini: {
+      circuit: GeminiClient.getCircuitState ? GeminiClient.getCircuitState() : { open: false },
+      metrics: GeminiClient.getMetrics ? GeminiClient.getMetrics() : {}
+    },
     ...stats
   });
 });
