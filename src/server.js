@@ -494,88 +494,108 @@ app.post("/webhook", async (req, res) => {
   const parsed = whatsapp.parseIncoming(req.body);
   if (!parsed) return;
 
-  const start = Date.now();
-  const { from, text: rawText, name, isButton, buttonId, type: msgType } = parsed;
-
-  if (parsed.msgId) {
-    whatsapp.markAsRead(from, parsed.msgId);
-  }
-
-  const rateCheck = rateLimiter.check(from);
-  if (!rateCheck.allowed) {
-    await whatsapp.sendMessage(from, "Mohon tunggu sebentar, Anda terlalu cepat mengirim pesan. Silakan coba lagi dalam beberapa detik.");
-    return;
-  }
-
-  // Group chat: hanya reply jika @mention (context.group_id = group message)
-  const msgCtx = req.body?.entry?.[0]?.changes?.[0]?.value?.messages?.[0]?.context;
-  if (msgCtx?.group_id) {
-    return;
-  }
-
-  if (isButton && buttonId && !validateButtonId(buttonId)) return;
-
-  if (msgType !== "text" && !isButton) {
-    const reply = handleNonTextMessage({ type: msgType });
-    if (reply) await whatsapp.sendMessage(from, reply);
-    return;
-  }
-
-  const lang = ((await db.getOrCreateSession(from))?.language) || "id";
-  console.log(`[⬇ ${isButton ? "BTN" : "TXT"}] ${(name || "?").padEnd(12)} ${from} → ${(rawText || buttonId || "").substring(0, 100)}`);
-
   try {
+    const start = Date.now();
+    const { from, text: rawText, name, isButton, buttonId, type: msgType } = parsed;
+
+    if (parsed.msgId) {
+      whatsapp.markAsRead(from, parsed.msgId);
+    }
+
+    const rateCheck = rateLimiter.check(from);
+    if (!rateCheck.allowed) {
+      await whatsapp.sendMessage(from, "Mohon tunggu sebentar, Anda terlalu cepat mengirim pesan. Silakan coba lagi dalam beberapa detik.");
+      return;
+    }
+
+    // Group chat: hanya reply jika @mention (context.group_id = group message)
+    const msgCtx = req.body?.entry?.[0]?.changes?.[0]?.value?.messages?.[0]?.context;
+    if (msgCtx?.group_id) {
+      return;
+    }
+
+    if (isButton && buttonId && !validateButtonId(buttonId)) return;
+
+    if (msgType !== "text" && !isButton) {
+      const reply = handleNonTextMessage({ type: msgType });
+      if (reply) await whatsapp.sendMessage(from, reply);
+      return;
+    }
+
+    const lang = ((await db.getOrCreateSession(from))?.language) || "id";
+    console.log(`[⬇ ${isButton ? "BTN" : "TXT"}] ${(name || "?").padEnd(12)} ${from} → ${(rawText || buttonId || "").substring(0, 100)}`);
+
     const reply = await handleIncoming(from, name, rawText, isButton, buttonId);
     await sendReply(from, reply, lang, name);
     console.log(`[⬆ OK] ${from} (${Date.now() - start}ms)`);
   } catch (err) {
-    console.error(`[❌ ERR] ${from}: ${err.message.substring(0, 100)}`);
-    await whatsapp.sendMessage(from, "Maaf, terjadi kesalahan. Silakan coba lagi atau ketik 'menu'.");
+    console.error(`[❌ ERR] ${from || "?"}: ${(err.message || err).substring(0, 100)}`);
+    try {
+      await whatsapp.sendMessage(from || "?", "Maaf, terjadi kesalahan. Silakan coba lagi atau ketik 'menu'.");
+    } catch (_) {}
   }
 });
 
 // ─── Admin & Utility Routes ───
 
 app.get("/", async (req, res) => {
-  const stats = await db.getStats();
-  res.json({
-    app: "SMKN 2 Mataram AI Assistant",
-    version: "4.0",
-    status: "running",
-    stats: {
-      jurusan: kb.data.jurusan.length,
-      faq: kb.data.faq.length,
-      total_users: stats.totalUsers,
-      total_messages: stats.totalMessages,
-      active_sessions: stats.activeSessions,
-      ai_instances: Object.keys(aiPool).length
-    },
-    endpoints: {
-      health: "/health",
-      analytics: "/analytics?token=",
-      sessions: "/sessions?token=",
-      feedback: "/feedback?token=",
-      unanswered: "/unanswered?token=",
-      conversation: "/conversation/:userId?token=",
-      broadcast: "/broadcast?token=",
-      events: "/events",
-      "events/add": "/events/add?token="
-    }
-  });
+  try {
+    const stats = await db.getStats();
+    res.json({
+      app: "SMKN 2 Mataram AI Assistant",
+      version: "4.0",
+      status: "running",
+      stats: {
+        jurusan: kb.data.jurusan.length,
+        faq: kb.data.faq.length,
+        total_users: stats.totalUsers,
+        total_messages: stats.totalMessages,
+        active_sessions: stats.activeSessions,
+        ai_instances: Object.keys(aiPool).length
+      },
+      endpoints: {
+        health: "/health",
+        analytics: "/analytics?token=",
+        sessions: "/sessions?token=",
+        feedback: "/feedback?token=",
+        unanswered: "/unanswered?token=",
+        conversation: "/conversation/:userId?token=",
+        broadcast: "/broadcast?token=",
+        events: "/events",
+        "events/add": "/events/add?token="
+      }
+    });
+  } catch (err) {
+    res.json({
+      app: "SMKN 2 Mataram AI Assistant",
+      version: "4.0",
+      status: "degraded",
+      db: "unavailable",
+      stats: {
+        jurusan: kb.data.jurusan.length,
+        faq: kb.data.faq.length,
+        ai_instances: Object.keys(aiPool).length
+      }
+    });
+  }
 });
 
 app.get("/health", async (req, res) => {
-  const stats = await db.getStats();
-  res.json({
-    status: "ok",
-    uptime: process.uptime(),
-    memory: process.memoryUsage().rss,
-    gemini: {
-      circuit: GeminiClient.getCircuitState ? GeminiClient.getCircuitState() : { open: false },
-      metrics: GeminiClient.getMetrics ? GeminiClient.getMetrics() : {}
-    },
-    ...stats
-  });
+  try {
+    const stats = await db.getStats();
+    res.json({
+      status: "ok",
+      uptime: process.uptime(),
+      memory: process.memoryUsage().rss,
+      gemini: {
+        circuit: GeminiClient.getCircuitState ? GeminiClient.getCircuitState() : { open: false },
+        metrics: GeminiClient.getMetrics ? GeminiClient.getMetrics() : {}
+      },
+      ...stats
+    });
+  } catch (err) {
+    res.status(503).json({ status: "degraded", db: "unavailable" });
+  }
 });
 
 app.get("/analytics", authMiddleware, async (req, res) => {

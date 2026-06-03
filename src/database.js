@@ -8,11 +8,16 @@ const DB_QUERY_TIMEOUT = 10000;
 
 class AppDatabase {
   async init() {
-    if (!process.env.DATABASE_URL) {
-      throw new Error("DATABASE_URL is not set");
-    }
+    const url = process.env.DATABASE_URL;
+    if (!url) throw new Error("DATABASE_URL is not set");
+
+    // Ensure ?pgbouncer=true for serverless connection pooling
+    const pgbouncerUrl = url.includes("pgbouncer=true") ? url : url + (url.includes("?") ? "&" : "?") + "pgbouncer=true";
+
     const pool = new Pool({
-      connectionString: process.env.DATABASE_URL,
+      connectionString: pgbouncerUrl,
+      max: 1,
+      idleTimeoutMillis: 30000,
       connectionTimeoutMillis: DB_TIMEOUT,
       ssl: { rejectUnauthorized: false }
     });
@@ -20,7 +25,6 @@ class AppDatabase {
       adapter: new PrismaPg(pool)
     });
     await withTimeout(this.prisma.$connect(), DB_TIMEOUT, "Database connection timeout");
-    // Test query to verify credentials and connection
     await withTimeout(this.prisma.$queryRaw`SELECT 1 AS ok`, DB_QUERY_TIMEOUT, "Database query timeout");
     return this;
   }
