@@ -5,6 +5,7 @@ class KnowledgeBase {
   constructor() {
     this.data = null;
     this.fullContext = "";
+    this.minimalContext = "";
     this.sections = {};
   }
 
@@ -43,7 +44,7 @@ Total Siswa: ${d.metadata.total_siswa} | Total Guru: ${d.metadata.total_guru}`
         ).join("\n")
       },
       spmb: {
-        keywords: ["spmb", "ppdb", "daftar", "pendaftaran", "syarat", "berkas", "seleksi", "jalur", "zonasi", "afirmasi", "prestasi", "tes", "fisik", "wawancara", "pengumuman", "ulang", "admission", "registration", "requirement", "document", "selection", "zone", "achievement", "test", "interview", "announcement", "enroll", "apply", "register"],
+        keywords: ["spmb", "ppdb", "daftar", "pendaftaran", "syarat", "berkas", "seleksi", "jalur", "zonasi", "afirmasi", "prestasi", "nilai", "rapor", "diterima", "keterima", "peluang", "tes", "fisik", "wawancara", "pengumuman", "ulang", "admission", "registration", "requirement", "document", "selection", "zone", "achievement", "test", "interview", "announcement", "enroll", "apply", "register"],
         content: `Deskripsi: ${d.spmb.deskripsi}
 Jalur: ${d.spmb.jalur_pendaftaran.map(j => `${j.nama} (${j.keterangan})`).join(" | ")}
 Syarat: ${d.spmb.persyaratan_umum.join(", ")}
@@ -75,6 +76,30 @@ Tahapan: ${d.spmb.tahapan.map((t, i) => `${i + 1}. ${t}`).join(" | ")}`
       parts.push(section.content);
     }
     this.fullContext = parts.join("\n\n");
+    this.minimalContext = this._buildMinimalContext();
+  }
+
+  _buildMinimalContext() {
+    const d = this.data;
+    if (!d) return "";
+    return `Identitas singkat: ${d.metadata.school_name}, NPSN ${d.metadata.npsn}, akreditasi ${d.metadata.akreditasi}, alamat ${d.kontak.alamat}.
+Kontak resmi: ${d.kontak.telepon}, ${d.kontak.email}, ${d.kontak.website}.`;
+  }
+
+  _tokens(query) {
+    const stopwords = new Set([
+      "apa", "ada", "dan", "atau", "yang", "untuk", "dari", "dengan", "saya", "aku", "kamu", "anda",
+      "di", "ke", "ini", "itu", "yg", "yang", "nya", "dong", "tolong", "bisa", "mau", "ingin"
+    ]);
+    return query.toLowerCase()
+      .replace(/[^a-z0-9\s]/gi, " ")
+      .split(/\s+/)
+      .filter(t => t.length > 2 && !stopwords.has(t));
+  }
+
+  _hasKeyword(q, keyword) {
+    const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return new RegExp(`(^|\\W)${escaped}($|\\W)`, "i").test(q);
   }
 
   getContext(query) {
@@ -83,30 +108,42 @@ Tahapan: ${d.spmb.tahapan.map((t, i) => `${i + 1}. ${t}`).join(" | ")}`
     if (!query) return this.fullContext;
 
     const q = query.toLowerCase();
+    const tokens = this._tokens(q);
+    const schoolRelated = /\b(smkn?\s*2|smk\s*negeri\s*2|mataram|sekolah|jurusan|spmb|ppdb|pendaftaran|daftar|nilai|rapor|diterima|keterima|lokasi|alamat|kontak)\b/i.test(q);
 
     const matchedSections = Object.entries(this.sections)
       .filter(([key, section]) => {
-        if (key === "faq") {
-          return section.content.toLowerCase().includes(q);
-        }
-        return section.keywords.some(kw => q.includes(kw));
+        if (key === "faq") return false;
+        return section.keywords.some(kw => this._hasKeyword(q, kw));
       })
       .map(([key]) => key);
 
+    const faqMatches = this.search(query)
+      .filter(m => m.type === "faq" && m.score >= 3)
+      .slice(0, 3)
+      .map(m => `Q: ${m.data.pertanyaan}\nA: ${m.data.jawaban}`);
+
     if (matchedSections.length === 0) {
-      return this.fullContext;
+      if (faqMatches.length) {
+        const base = schoolRelated ? `${this.minimalContext}\n\n` : "";
+        return `${base}FAQ relevan:\n${faqMatches.join("\n\n")}`.slice(0, 7000);
+      }
+      return schoolRelated ? this.minimalContext : "";
     }
 
-    // Always include profil at front + kontak at end as base context
-    if (!matchedSections.includes("profil")) {
+    if (schoolRelated && !matchedSections.includes("profil")) {
       matchedSections.unshift("profil");
     }
-    if (!matchedSections.includes("kontak")) {
+    if ((schoolRelated || matchedSections.includes("kontak")) && !matchedSections.includes("kontak")) {
       matchedSections.push("kontak");
     }
 
     const parts = matchedSections.map(key => this.sections[key].content);
-    return parts.join("\n\n");
+    if (faqMatches.length) {
+      parts.push(`FAQ relevan:\n${faqMatches.join("\n\n")}`);
+    }
+
+    return parts.join("\n\n").slice(0, 7000);
   }
 
   search(query) {
@@ -116,12 +153,12 @@ Tahapan: ${d.spmb.tahapan.map((t, i) => `${i + 1}. ${t}`).join(" | ")}`
     if (!d || !q) return results;
 
     // Tokenize query into keywords
-    const tokens = q.split(/\s+/).filter(t => t.length > 1);
+    const tokens = this._tokens(q).filter(t => !["sekolah", "smk", "smkn", "negeri", "mataram"].includes(t));
 
     d.jurusan.forEach((j) => {
       const target = (j.nama + " " + j.singkatan + " " + j.deskripsi).toLowerCase();
       let score = 0;
-      if (target.includes(q)) { score = 10; }
+      if (q.length >= 4 && target.includes(q)) { score = 10; }
       else {
         for (const t of tokens) {
           if (target.includes(t)) score++;
@@ -137,7 +174,7 @@ Tahapan: ${d.spmb.tahapan.map((t, i) => `${i + 1}. ${t}`).join(" | ")}`
       const jawaban = f.jawaban.toLowerCase();
       const target = pertanyaan + " " + jawaban;
       let score = 0;
-      if (target.includes(q)) { score = 10; }
+      if (q.length >= 4 && target.includes(q)) { score = 10; }
       else {
         for (const t of tokens) {
           if (pertanyaan.includes(t)) score += 3; // prefer question match
