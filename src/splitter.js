@@ -3,7 +3,7 @@
  * Batas WhatsApp: 4096 chars per pesan
  */
 
-const MAX_LENGTH = 4000;
+const MAX_LENGTH = 1600;
 
 function split(text) {
   if (!text || text.length <= MAX_LENGTH) {
