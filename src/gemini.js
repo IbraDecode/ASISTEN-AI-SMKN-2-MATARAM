@@ -57,7 +57,7 @@ class GeminiClient {
     this.responseId = null;
     this.lastMeta = null;
 
-    this.timeout = opts.timeout || 8000;
+    this.timeout = opts.timeout || 6000;
     this.maxRetries = opts.maxRetries || 1;
     this.userAgent = opts.userAgent || USER_AGENTS[uaIndex++ % USER_AGENTS.length];
 
@@ -120,7 +120,7 @@ class GeminiClient {
       try {
         const res = await nodeFetch(url, {
           headers: { "user-agent": this.userAgent },
-          signal: AbortSignal.timeout(7000),
+          signal: AbortSignal.timeout(5500),
           redirect: "follow"
         });
         const html = await res.text();

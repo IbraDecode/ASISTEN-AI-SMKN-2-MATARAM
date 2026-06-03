@@ -489,17 +489,25 @@ app.get("/webhook", (req, res) => {
 });
 
 app.post("/webhook", async (req, res) => {
-  res.sendStatus(200);
+  try {
+    await processWebhook(req.body);
+    res.sendStatus(200);
+  } catch (err) {
+    console.error("[WEBHOOK FATAL]", err?.message || err);
+    res.sendStatus(200);
+  }
+});
 
-  const parsed = whatsapp.parseIncoming(req.body);
+async function processWebhook(body) {
+  const parsed = whatsapp.parseIncoming(body);
   if (!parsed) return;
 
-  try {
-    const start = Date.now();
-    const { from, text: rawText, name, isButton, buttonId, type: msgType } = parsed;
+  const start = Date.now();
+  const { from, text: rawText, name, isButton, buttonId, type: msgType } = parsed;
 
+  try {
     if (parsed.msgId) {
-      whatsapp.markAsRead(from, parsed.msgId);
+      whatsapp.markAsRead(from, parsed.msgId).catch(err => console.error(`[READ ERR] ${from}: ${err.message}`));
     }
 
     const rateCheck = rateLimiter.check(from);
@@ -508,11 +516,8 @@ app.post("/webhook", async (req, res) => {
       return;
     }
 
-    // Group chat: hanya reply jika @mention (context.group_id = group message)
-    const msgCtx = req.body?.entry?.[0]?.changes?.[0]?.value?.messages?.[0]?.context;
-    if (msgCtx?.group_id) {
-      return;
-    }
+    const msgCtx = body?.entry?.[0]?.changes?.[0]?.value?.messages?.[0]?.context;
+    if (msgCtx?.group_id) return;
 
     if (isButton && buttonId && !validateButtonId(buttonId)) return;
 
@@ -531,10 +536,10 @@ app.post("/webhook", async (req, res) => {
   } catch (err) {
     console.error(`[❌ ERR] ${from || "?"}: ${(err.message || err).substring(0, 100)}`);
     try {
-      await whatsapp.sendMessage(from || "?", "Maaf, terjadi kesalahan. Silakan coba lagi atau ketik 'menu'.");
+      await whatsapp.sendMessage(from, "Maaf, terjadi kesalahan. Silakan coba lagi atau ketik 'menu'.");
     } catch (_) {}
   }
-});
+}
 
 // ─── Admin & Utility Routes ───
 
