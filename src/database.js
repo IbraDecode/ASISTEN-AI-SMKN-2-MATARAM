@@ -2,8 +2,10 @@ require("dotenv").config();
 
 class AppDatabase {
   async init() {
+    // Try both .js and .ts extensions (Vercel vs local Node 22+)
+    const prismaMod = await this._importPrisma();
     const [{ PrismaClient }, { PrismaPg }] = await Promise.all([
-      import("./generated/prisma/client.ts"),
+      prismaMod,
       import("@prisma/adapter-pg")
     ]);
     this.prisma = new PrismaClient({
@@ -11,6 +13,15 @@ class AppDatabase {
     });
     await this.prisma.$connect();
     return this;
+  }
+
+  async _importPrisma() {
+    try {
+      return await import("./generated/prisma/client.js");
+    } catch {
+      // Fallback to .ts (Node 22+ native TS support)
+      return await import("./generated/prisma/client.ts");
+    }
   }
 
   // ─── Sessions ───
