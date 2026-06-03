@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Session {
+  userId       String    @id @map("user_id")
+  state        String    @default("MENU")
+  language     String    @default("id")
+  messageCount Int       @default(0) @map("message_count")
+  history      String    @default("[]")
+  firstSeen    DateTime  @default(now()) @map("first_seen")
+  updatedAt    DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  messages Message[]
+
+  @@map("chat_sessions")
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  userId    String   @map("user_id")
+  userName  String   @default("") @map("user_name")
+  role      String
+  content   String
+  source    String   @default("")
+  topic     String   @default("")
+  language  String   @default("id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  session Session @relation(fields: [userId], references: [userId])
+
+  @@index([userId, createdAt])
+  @@index([createdAt])
+  @@map("messages")
+}
+
+model Feedback {
+  id        Int      @id @default(autoincrement())
+  userId    String   @map("user_id")
+  messageId Int?     @map("message_id")
+  rating    String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("feedback")
+}
+
+model Event {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String   @default("")
+  eventDate   DateTime @map("event_date")
+  category    String   @default("umum")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([eventDate])
+  @@index([category])
+  @@map("events")
+}
+
+model Unanswered {
+  id        Int      @id @default(autoincrement())
+  userId    String   @map("user_id")
+  question  String
+  reason    String   @default("")
+  answered  Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([answered, createdAt])
+  @@map("unanswered")
+}

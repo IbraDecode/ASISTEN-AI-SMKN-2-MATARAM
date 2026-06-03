@@ -1,186 +1,212 @@
-const Database = require("better-sqlite3");
-const path = require("path");
+require("dotenv").config();
 
 class AppDatabase {
-  constructor(dbPath) {
-    this.db = new Database(dbPath || path.join(__dirname, "..", "data", "smkn2.db"));
-    this.db.pragma("journal_mode = WAL");
-    this.db.pragma("foreign_keys = ON");
-    this._init();
-  }
-
-  _init() {
-    this.db.exec(`
-      CREATE TABLE IF NOT EXISTS sessions (
-        user_id TEXT PRIMARY KEY,
-        state TEXT DEFAULT 'MENU',
-        language TEXT DEFAULT 'id',
-        message_count INTEGER DEFAULT 0,
-        history TEXT DEFAULT '[]',
-        first_seen TEXT DEFAULT (datetime('now')),
-        updated_at TEXT DEFAULT (datetime('now'))
-      );
-
-      CREATE TABLE IF NOT EXISTS messages (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id TEXT NOT NULL,
-        user_name TEXT DEFAULT '',
-        role TEXT NOT NULL,
-        content TEXT NOT NULL,
-        source TEXT DEFAULT '',
-        topic TEXT DEFAULT '',
-        language TEXT DEFAULT 'id',
-        created_at TEXT DEFAULT (datetime('now'))
-      );
-
-      CREATE TABLE IF NOT EXISTS feedback (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id TEXT NOT NULL,
-        message_id INTEGER,
-        rating TEXT NOT NULL CHECK(rating IN ('up','down')),
-        created_at TEXT DEFAULT (datetime('now'))
-      );
-
-      CREATE TABLE IF NOT EXISTS unanswered (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id TEXT NOT NULL,
-        question TEXT NOT NULL,
-        reason TEXT DEFAULT '',
-        answered INTEGER DEFAULT 0,
-        created_at TEXT DEFAULT (datetime('now'))
-      );
-
-      CREATE INDEX IF NOT EXISTS idx_messages_user_time ON messages(user_id, created_at);
-      CREATE INDEX IF NOT EXISTS idx_messages_created ON messages(created_at);
-      CREATE INDEX IF NOT EXISTS idx_unanswered_status ON unanswered(answered, created_at);
-    `);
+  async init() {
+    const [{ PrismaClient }, { PrismaPg }] = await Promise.all([
+      import("../generated/prisma/client.ts"),
+      import("@prisma/adapter-pg")
+    ]);
+    this.prisma = new PrismaClient({
+      adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
+    });
+    await this.prisma.$connect();
+    return this;
   }
 
   // ─── Sessions ───
 
-  getSession(userId) {
-    const row = this.db.prepare("SELECT * FROM sessions WHERE user_id = ?").get(userId);
+  async getSession(userId) {
+    const row = await this.prisma.session.findUnique({ where: { userId } });
     if (!row) return null;
-    row.history = JSON.parse(row.history || "[]");
-    return row;
+    return {
+      ...row,
+      // Backward compatibility: expose snake_case fields
+      message_count: row.messageCount,
+      first_seen: row.firstSeen,
+      updated_at: row.updatedAt,
+      history: JSON.parse(row.history || "[]")
+    };
   }
 
-  createSession(userId) {
-    this.db.prepare(`
-      INSERT OR IGNORE INTO sessions (user_id, state, language, history)
-      VALUES (?, 'MENU', 'id', '[]')
-    `).run(userId);
+  async createSession(userId) {
+    await this.prisma.session.upsert({
+      where: { userId },
+      create: { userId },
+      update: {}
+    });
     return this.getSession(userId);
   }
 
-  updateSession(userId, data) {
-    const fields = [];
-    const values = [];
-    for (const [key, val] of Object.entries(data)) {
-      if (["state", "language", "message_count"].includes(key)) {
-        fields.push(`${key} = ?`);
-        values.push(val);
-      }
+  async updateSession(userId, data) {
+    const updateData = {};
+    if (data.state !== undefined) updateData.state = data.state;
+    if (data.language !== undefined) updateData.language = data.language;
+    if (data.message_count !== undefined) updateData.messageCount = data.message_count;
+    if (data.history !== undefined) updateData.history = JSON.stringify(data.history);
+    if (Object.keys(updateData).length === 0) return;
+    try {
+      await this.prisma.session.update({ where: { userId }, data: updateData });
+    } catch (e) {
+      console.error(`[DB UPDATE ERR] userId=${userId} data=${JSON.stringify(data)} updateData=${JSON.stringify(updateData)} err=${e.message}`);
+      throw e;
     }
-    if (data.history) {
-      fields.push("history = ?");
-      values.push(JSON.stringify(data.history));
-    }
-    fields.push("updated_at = datetime('now')");
-    values.push(userId);
-    this.db.prepare(`UPDATE sessions SET ${fields.join(", ")} WHERE user_id = ?`).run(...values);
   }
 
-  getOrCreateSession(userId) {
-    return this.getSession(userId) || this.createSession(userId);
+  async getOrCreateSession(userId) {
+    let s = await this.getSession(userId);
+    if (!s) s = await this.createSession(userId);
+    return s;
   }
 
-  cleanupSessions(maxAgeMinutes = 60) {
-    this.db.prepare(`
-      DELETE FROM sessions WHERE updated_at < datetime('now', '-${maxAgeMinutes} minutes')
-    `).run();
-    this.db.prepare(`
-      DELETE FROM messages WHERE created_at < datetime('now', '-7 days')
-    `).run();
+  async cleanupSessions(maxAgeMinutes = 60) {
+    const cutoff = new Date(Date.now() - maxAgeMinutes * 60000);
+    const weekAgo = new Date(Date.now() - 7 * 86400000);
+    await this.prisma.session.deleteMany({ where: { updatedAt: { lt: cutoff } } });
+    await this.prisma.message.deleteMany({ where: { createdAt: { lt: weekAgo } } });
   }
 
-  getAllSessions() {
-    return this.db.prepare("SELECT user_id, state, language, message_count, updated_at FROM sessions ORDER BY updated_at DESC").all();
+  async getAllSessions() {
+    const rows = await this.prisma.session.findMany({
+      select: { userId: true, state: true, language: true, messageCount: true, updatedAt: true },
+      orderBy: { updatedAt: "desc" }
+    });
+    return rows.map(r => ({ ...r, message_count: r.messageCount, updated_at: r.updatedAt }));
   }
 
   // ─── Messages ───
 
-  saveMessage(userId, userName, role, content, source = "", topic = "", lang = "id") {
-    this.db.prepare(`
-      INSERT INTO messages (user_id, user_name, role, content, source, topic, language)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `).run(userId, userName, role, content, source, topic, lang);
-    return this.db.prepare("SELECT last_insert_rowid() as id").get().id;
+  async saveMessage(userId, userName, role, content, source = "", topic = "", lang = "id") {
+    const msg = await this.prisma.message.create({
+      data: { userId, userName, role, content, source, topic, language: lang }
+    });
+    return msg.id;
   }
 
-  getMessages(userId, limit = 50) {
-    return this.db.prepare(`
-      SELECT * FROM messages WHERE user_id = ? ORDER BY created_at DESC LIMIT ?
-    `).all(userId, limit).reverse();
+  async getMessages(userId, limit = 50) {
+    return this.prisma.message.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      take: limit
+    });
   }
 
-  getRecentMessages(limit = 20) {
-    return this.db.prepare(`
-      SELECT * FROM messages ORDER BY created_at DESC LIMIT ?
-    `).all(limit);
+  async getRecentMessages(limit = 20) {
+    return this.prisma.message.findMany({
+      orderBy: { createdAt: "desc" },
+      take: limit
+    });
   }
 
-  getConversationContext(userId, limit = 6) {
-    return this.db.prepare(`
-      SELECT role, content FROM messages
-      WHERE user_id = ? ORDER BY created_at ASC LIMIT ?
-    `).all(userId, limit);
+  async getConversationContext(userId, limit = 6) {
+    return this.prisma.message.findMany({
+      where: { userId },
+      orderBy: { createdAt: "asc" },
+      take: limit,
+      select: { role: true, content: true }
+    });
   }
 
   // ─── Feedback ───
 
-  saveFeedback(userId, messageId, rating) {
-    this.db.prepare(`
-      INSERT INTO feedback (user_id, message_id, rating) VALUES (?, ?, ?)
-    `).run(userId, messageId, rating);
+  async saveFeedback(userId, messageId, rating) {
+    await this.prisma.feedback.create({
+      data: { userId, messageId, rating }
+    });
   }
 
-  getFeedbackStats() {
-    const up = this.db.prepare("SELECT COUNT(*) as c FROM feedback WHERE rating = 'up'").get().c;
-    const down = this.db.prepare("SELECT COUNT(*) as c FROM feedback WHERE rating = 'down'").get().c;
+  async getFeedbackStats() {
+    const [up, down] = await Promise.all([
+      this.prisma.feedback.count({ where: { rating: "up" } }),
+      this.prisma.feedback.count({ where: { rating: "down" } })
+    ]);
     return { up, down, total: up + down, ratio: up + down > 0 ? (up / (up + down) * 100).toFixed(1) : 0 };
   }
 
   // ─── Unanswered ───
 
-  addUnanswered(userId, question, reason = "") {
-    this.db.prepare(`
-      INSERT INTO unanswered (user_id, question, reason) VALUES (?, ?, ?)
-    `).run(userId, question, reason);
+  async addUnanswered(userId, question, reason = "") {
+    await this.prisma.unanswered.create({
+      data: { userId, question, reason }
+    });
   }
 
-  getUnanswered(limit = 50) {
-    return this.db.prepare(`
-      SELECT * FROM unanswered WHERE answered = 0 ORDER BY created_at DESC LIMIT ?
-    `).all(limit);
+  async getUnanswered(limit = 50) {
+    return this.prisma.unanswered.findMany({
+      where: { answered: 0 },
+      orderBy: { createdAt: "desc" },
+      take: limit
+    });
   }
 
-  markAnswered(id) {
-    this.db.prepare("UPDATE unanswered SET answered = 1 WHERE id = ?").run(id);
+  async markAnswered(id) {
+    await this.prisma.unanswered.update({
+      where: { id },
+      data: { answered: 1 }
+    });
+  }
+
+  // ─── Broadcast ───
+
+  async getAllUserIds() {
+    const rows = await this.prisma.session.findMany({
+      select: { userId: true },
+      where: { NOT: { userId: "" } }
+    });
+    return rows.map(r => r.userId);
+  }
+
+  async countAllUsers() {
+    return this.prisma.session.count();
+  }
+
+  // ─── Events / Calendar ───
+
+  async addEvent(title, description, eventDate, category = "umum") {
+    const event = await this.prisma.event.create({
+      data: { title, description, eventDate: new Date(eventDate), category }
+    });
+    return event;
+  }
+
+  async getEvents(limit = 20, category = null) {
+    const where = category ? { category } : {};
+    return this.prisma.event.findMany({
+      where,
+      orderBy: { eventDate: "asc" },
+      take: limit
+    });
+  }
+
+  async getUpcomingEvents(days = 7) {
+    const now = new Date();
+    const end = new Date(Date.now() + days * 86400000);
+    return this.prisma.event.findMany({
+      where: { eventDate: { gte: now, lte: end } },
+      orderBy: { eventDate: "asc" }
+    });
+  }
+
+  async deleteEvent(id) {
+    await this.prisma.event.delete({ where: { id } });
   }
 
   // ─── Stats ───
 
-  getStats() {
-    const totalUsers = this.db.prepare("SELECT COUNT(DISTINCT user_id) as c FROM messages").get().c;
-    const totalMessages = this.db.prepare("SELECT COUNT(*) as c FROM messages").get().c;
-    const activeSessions = this.db.prepare("SELECT COUNT(*) as c FROM sessions").get().c;
-    const sourceStats = this.db.prepare(`
-      SELECT source, COUNT(*) as c FROM messages GROUP BY source ORDER BY c DESC
-    `).all();
-    const feedbackStats = this.getFeedbackStats();
+  async getStats() {
+    const [totalUsers, totalMessages, activeSessions, sourceStatsRows, feedbackStats] = await Promise.all([
+      this.prisma.message.groupBy({ by: ["userId"] }).then(r => r.length),
+      this.prisma.message.count(),
+      this.prisma.session.count(),
+      this.prisma.message.groupBy({ by: ["source"], _count: { source: true } }).then(r =>
+        r.map(x => ({ source: x.source, c: x._count.source })).sort((a, b) => b.c - a.c)
+      ),
+      this.getFeedbackStats()
+    ]);
+    return { totalUsers, totalMessages, activeSessions, sourceStats: sourceStatsRows, feedback: feedbackStats };
+  }
 
-    return { totalUsers, totalMessages, activeSessions, sourceStats, feedback: feedbackStats };
+  async close() {
+    if (this.prisma) await this.prisma.$disconnect();
   }
 }
 
